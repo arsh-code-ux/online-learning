@@ -9,7 +9,6 @@ import {
   FaPlay,
   FaCheckCircle,
   FaAward,
-  FaRocket,
   FaBolt,
   FaChevronLeft,
   FaChevronRight
@@ -244,16 +243,16 @@ const HomePage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-10 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-r from-green-400 to-blue-500 rounded-full opacity-10 animate-bounce"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full opacity-5 animate-spin" style={{animationDuration: '20s'}}></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-gradient-to-r from-green-400 to-blue-500 rounded-full opacity-15 animate-bounce"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full opacity-10 animate-spin" style={{animationDuration: '20s'}}></div>
         
         {/* Floating Learning Icons */}
-        <div className="absolute top-20 left-10 text-4xl animate-bounce-gentle" style={{animationDelay: '0s'}}>📚</div>
-        <div className="absolute top-40 right-20 text-3xl animate-bounce-gentle" style={{animationDelay: '1s'}}>🎓</div>
-        <div className="absolute bottom-40 left-20 text-3xl animate-bounce-gentle" style={{animationDelay: '2s'}}>💡</div>
-        <div className="absolute bottom-20 right-10 text-4xl animate-bounce-gentle" style={{animationDelay: '0.5s'}}>🚀</div>
-        <div className="absolute top-1/3 left-1/4 text-2xl animate-bounce-gentle" style={{animationDelay: '1.5s'}}>⭐</div>
+        <div className="absolute top-20 left-10 text-5xl animate-bounce-gentle" style={{animationDelay: '0s'}}>📚</div>
+        <div className="absolute top-40 right-20 text-4xl animate-bounce-gentle" style={{animationDelay: '1s'}}>🎓</div>
+        <div className="absolute bottom-40 left-20 text-4xl animate-bounce-gentle" style={{animationDelay: '2s'}}>💡</div>
+        <div className="absolute bottom-20 right-10 text-5xl animate-bounce-gentle" style={{animationDelay: '0.5s'}}>✨</div>
+        <div className="absolute top-1/3 left-1/4 text-3xl animate-bounce-gentle" style={{animationDelay: '1.5s'}}>⭐</div>
       </div>
 
       {/* Enhanced Hero Section */}
@@ -269,33 +268,32 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-slide-in-left">
-              <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6 border border-white/20">
-                <FaRocket className="text-yellow-400 mr-2" />
-                <span className="text-sm font-medium">🎯 Transform Your Career Today</span>
+              <div className="inline-flex items-center bg-gradient-to-r from-yellow-400/20 to-orange-500/20 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border-2 border-yellow-400/30">
+                <span className="text-lg font-semibold">✨ Transform Your Career Today</span>
               </div>
               
               <h1 className="text-6xl lg:text-7xl font-bold leading-tight mb-6">
                 Master New Skills with
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500"> Expert Courses</span> 🚀
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500"> Expert Courses</span>
               </h1>
               
               <p className="text-xl mb-8 text-blue-100 leading-relaxed">
-                🌟 Join thousands of learners advancing their careers with our comprehensive 
+                Join thousands of learners advancing their careers with our comprehensive 
                 skill-building courses in Soft Skills, Technical Skills, and Analytical Skills.
               </p>
               
               {/* Enhanced Stats */}
               <div className="flex flex-wrap gap-6 mb-8">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                  <div className="text-2xl font-bold text-yellow-300">10K+</div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20 hover:bg-white/20 transition-all">
+                  <div className="text-3xl font-bold text-yellow-300">10K+</div>
                   <div className="text-sm text-blue-200">Happy Students</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                  <div className="text-2xl font-bold text-green-300">50+</div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20 hover:bg-white/20 transition-all">
+                  <div className="text-3xl font-bold text-green-300">50+</div>
                   <div className="text-sm text-blue-200">Expert Courses</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/20">
-                  <div className="text-2xl font-bold text-purple-300">100%</div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20 hover:bg-white/20 transition-all">
+                  <div className="text-3xl font-bold text-purple-300">100%</div>
                   <div className="text-sm text-blue-200">Certified</div>
                 </div>
               </div>
@@ -304,15 +302,15 @@ const HomePage = () => {
                 <Link 
                   to="/courses" 
                   onClick={handleExploreCoursesClick}
-                  className="group bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 flex items-center justify-center transform hover:scale-105 animate-pulse-glow"
+                  className="group bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 flex items-center justify-center transform hover:scale-105"
                 >
-                  <FaBolt className="mr-2 group-hover:animate-bounce" />
+                  <FaBolt className="mr-2 group-hover:animate-bounce text-xl" />
                   Explore Courses
                   <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link 
                   to="/register" 
-                  className="group border-2 border-white/30 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/10 backdrop-blur-sm transition-all duration-300 flex items-center justify-center transform hover:scale-105"
+                  className="group border-2 border-white/40 text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-white hover:text-indigo-900 backdrop-blur-sm transition-all duration-300 flex items-center justify-center transform hover:scale-105"
                 >
                   <FaPlay className="mr-2 group-hover:animate-pulse" />
                   Start Learning Free
@@ -429,8 +427,8 @@ const HomePage = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4 animate-float-up">
-              🏆 Trusted by Thousands of Learners
+            <h2 className="text-5xl font-bold text-gray-900 mb-4 animate-float-up">
+              Trusted by Thousands of Learners
             </h2>
             <p className="text-xl text-gray-600 animate-float-up" style={{animationDelay: '0.2s'}}>
               Join our growing community of successful students
@@ -441,15 +439,15 @@ const HomePage = () => {
             {stats.map((stat, index) => (
               <div 
                 key={index} 
-                className="feature-card text-center bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl border border-gray-100 animate-float-up"
+                className="feature-card text-center bg-gradient-to-br from-white to-blue-50 rounded-3xl p-8 shadow-xl hover:shadow-2xl border-2 border-blue-100 hover:border-blue-300 animate-float-up transform hover:-translate-y-2"
                 style={{animationDelay: `${index * 0.1}s`}}
               >
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                  <span className="text-2xl">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-3xl">
                     {index === 0 ? '👥' : index === 1 ? '📚' : index === 2 ? '🎓' : '⭐'}
                   </span>
                 </div>
-                <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <div className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
                   {stat.number}
                 </div>
                 <div className="text-gray-600 font-medium">{stat.label}</div>
@@ -460,18 +458,18 @@ const HomePage = () => {
       </section>
 
       {/* Enhanced Features Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 relative">
+      <section className="py-20 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-float-up">
-            <div className="inline-flex items-center bg-blue-100 text-blue-800 px-6 py-2 rounded-full mb-6">
-              <FaStar className="mr-2" />
-              <span className="font-medium">✨ Premium Features</span>
+            <div className="inline-flex items-center bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 px-8 py-3 rounded-full mb-6 border-2 border-blue-200">
+              <FaStar className="mr-2 text-yellow-500" />
+              <span className="font-semibold text-lg">Premium Features</span>
             </div>
-            <h2 className="text-5xl font-bold text-gray-900 mb-6">
-              Why Choose Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Platform?</span>
+            <h2 className="text-6xl font-bold text-gray-900 mb-6">
+              Why Choose Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">Platform?</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              🎯 We provide comprehensive learning experiences designed to help you succeed in your career with cutting-edge technology and expert guidance
+              We provide comprehensive learning experiences designed to help you succeed in your career with cutting-edge technology and expert guidance
             </p>
           </div>
           
@@ -479,31 +477,31 @@ const HomePage = () => {
             {features.map((feature, index) => (
               <div 
                 key={index} 
-                className="feature-card text-center p-8 bg-white rounded-3xl shadow-lg hover:shadow-2xl border border-gray-100 relative overflow-hidden animate-float-up"
+                className="feature-card text-center p-8 bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl hover:shadow-2xl border-2 border-gray-100 hover:border-purple-300 relative overflow-hidden animate-float-up transform hover:-translate-y-3"
                 style={{animationDelay: `${index * 0.15}s`}}
               >
                 {/* Background Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                 
                 <div className="relative z-10">
-                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-r ${
+                  <div className={`inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-r ${
                     index === 0 ? 'from-blue-500 to-blue-600' :
                     index === 1 ? 'from-green-500 to-green-600' :
                     index === 2 ? 'from-purple-500 to-purple-600' :
                     'from-orange-500 to-orange-600'
-                  } mb-6 transform hover:scale-110 hover:rotate-6 transition-all duration-300 shadow-lg`}>
-                    <feature.icon className="text-3xl text-white" />
+                  } mb-6 transform hover:scale-110 hover:rotate-6 transition-all duration-300 shadow-xl`}>
+                    <feature.icon className="text-4xl text-white" />
                   </div>
                   
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
+                  <p className="text-gray-600 leading-relaxed text-base">{feature.description}</p>
                   
                   {/* Feature Badge */}
-                  <div className="mt-4 inline-block bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                  <div className="mt-6 inline-block bg-gradient-to-r from-blue-100 to-purple-100 text-gray-800 px-4 py-2 rounded-full text-sm font-semibold">
                     {index === 0 ? '🎓 Expert Led' :
                      index === 1 ? '🏆 Certified' :
                      index === 2 ? '👥 Community' :
-                     '🚀 Career Ready'}
+                     '✨ Career Ready'}
                   </div>
                 </div>
               </div>

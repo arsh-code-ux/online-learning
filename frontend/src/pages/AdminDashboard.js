@@ -1,438 +1,325 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
-  FaPlus, 
-  FaEdit, 
-  FaTrash, 
-  FaEye,
-  FaUsers,
-  FaDollarSign,
-  FaChartLine,
-  FaBook,
-  FaSearch,
-  FaFilter,
-  FaDownload,
-  FaCog,
-  FaUserGraduate,
-  FaCalendar,
-  FaStar
+  FaUsers, FaCertificate, FaBookOpen, FaChartLine, 
+  FaUserGraduate, FaMoneyBillWave, FaCog, FaSignOutAlt,
+  FaHome, FaDatabase, FaPlus, FaEdit, FaSearch, FaTrash,
+  FaEye, FaDownload, FaEnvelope
 } from 'react-icons/fa';
-import { CourseContext } from '../context/CourseContext';
-import { AuthContext } from '../context/AuthContext';
-import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
-  const { getAllCourses, deleteCourse, getAdminStats } = useContext(CourseContext);
-  const { user } = useContext(AuthContext);
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalCourses: 0,
-    totalStudents: 0,
-    totalRevenue: 0,
-    averageRating: 0
-  });
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [filteredCourses, setFilteredCourses] = useState([]);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-
-  const categories = [
-    { id: 'all', name: 'All Categories' },
-    { id: 'soft-skills', name: 'Soft Skills' },
-    { id: 'technical-skills', name: 'Technical Skills' },
-    { id: 'analytical-skills', name: 'Analytical Skills' }
-  ];
-
-  useEffect(() => {
-    fetchAdminData();
-  }, []);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalEnrollments: 0,
+    totalCertificates: 0,
+    totalCourses: 0,
+    revenue: 0
+  });
+  const [allUsers, setAllUsers] = useState([]);
+  const [certificates, setCertificates] = useState([]);
 
   useEffect(() => {
-    filterCourses();
-  }, [courses, searchTerm, selectedCategory]);
+    if (!user || user.role !== 'admin') {
+      toast.error('Unauthorized! Admin access only.');
+      navigate('/admin/login');
+      return;
+    }
+    loadAllData();
+  }, [user, navigate]);
 
-  const fetchAdminData = async () => {
-    try {
-      setLoading(true);
-      const [coursesData, statsData] = await Promise.all([
-        getAllCourses(),
-        getAdminStats()
-      ]);
+  const loadAllData = () => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
+    const premiumCourses = JSON.parse(localStorage.getItem('premiumCourses') || '[]');
+    
+    let totalEnrollments = 0;
+    const usersWithEnrollments = users.filter(u => u.role !== 'admin').map(u => {
+      const userProgress = JSON.parse(localStorage.getItem(`courseProgress_${u.id}`) || '{}');
+      const enrollments = Object.keys(userProgress);
+      totalEnrollments += enrollments.length;
       
-      setCourses(coursesData || []);
-      setStats(statsData || stats);
-    } catch (error) {
-      toast.error('Failed to load admin data');
-    } finally {
-      setLoading(false);
+      return {
+        ...u,
+        enrollments,
+        enrollmentCount: enrollments.length
+      };
+    });
+
+    setAllUsers(usersWithEnrollments);
+    setCertificates(certs);
+
+    setStats({
+      totalUsers: usersWithEnrollments.length,
+      totalEnrollments,
+      totalCertificates: certs.length,
+      totalCourses: 5,
+      revenue: premiumCourses.length * 999
+    });
+  };
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    navigate('/admin/login');
+  };
+
+  const handleDeleteUser = (userId) => {
+    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const updatedUsers = users.filter(u => u.id !== userId);
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
+      loadAllData();
+      toast.success('User deleted successfully');
     }
   };
 
-  const filterCourses = () => {
-    let filtered = [...courses];
-
-    if (searchTerm) {
-      filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(course => course.category === selectedCategory);
-    }
-
-    setFilteredCourses(filtered);
-  };
-
-  const handleDeleteCourse = async (courseId) => {
-    if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
-      try {
-        await deleteCourse(courseId);
-        setCourses(courses.filter(course => course._id !== courseId));
-        toast.success('Course deleted successfully');
-      } catch (error) {
-        toast.error('Failed to delete course');
-      }
-    }
-  };
-
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case 'soft-skills':
-        return 'bg-blue-100 text-blue-700';
-      case 'technical-skills':
-        return 'bg-green-100 text-green-700';
-      case 'analytical-skills':
-        return 'bg-purple-100 text-purple-700';
-      default:
-        return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
+  const StatCard = ({ icon: Icon, title, value, color, bgColor }) => (
+    <div className={`${bgColor} rounded-xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-600 text-sm font-medium">{title}</p>
+          <p className="text-3xl font-bold mt-2">{value}</p>
+        </div>
+        <div className={`w-16 h-16 ${color} rounded-full flex items-center justify-center`}>
+          <Icon className="text-white text-2xl" />
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+
+  const TabButton = ({ tab, icon: Icon, label }) => (
+    <button
+      onClick={() => setActiveTab(tab)}
+      className={`flex items-center space-x-3 w-full px-4 py-3 rounded-lg transition-all duration-200 ${
+        activeTab === tab
+          ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+          : 'text-gray-700 hover:bg-gray-100'
+      }`}
+    >
+      <Icon className="text-xl" />
+      <span className="font-medium">{label}</span>
+    </button>
+  );
+
+  const filteredUsers = allUsers.filter(u => 
+    u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b px-4 py-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-2">
-                Manage courses, monitor performance, and oversee student progress
-              </p>
+      <header className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <FaHome className="text-white text-3xl" />
+              <div>
+                <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+                <p className="text-blue-100">Welcome back, {user?.name}!</p>
+              </div>
             </div>
             <button
-              onClick={() => setShowCreateModal(true)}
-              className="btn-primary"
+              onClick={handleLogout}
+              className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-200"
             >
-              <FaPlus className="mr-2" />
-              Create Course
+              <FaSignOutAlt />
+              <span>Logout</span>
             </button>
           </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-lg text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm">Total Courses</p>
-                  <p className="text-3xl font-bold">{stats.totalCourses}</p>
-                </div>
-                <FaBook className="text-3xl text-blue-200" />
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-lg text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm">Total Students</p>
-                  <p className="text-3xl font-bold">{stats.totalStudents}</p>
-                </div>
-                <FaUserGraduate className="text-3xl text-green-200" />
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-6 rounded-lg text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-yellow-100 text-sm">Total Revenue</p>
-                  <p className="text-3xl font-bold">${stats.totalRevenue}</p>
-                </div>
-                <FaDollarSign className="text-3xl text-yellow-200" />
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-lg text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm">Avg Rating</p>
-                  <p className="text-3xl font-bold">{stats.averageRating}</p>
-                </div>
-                <FaStar className="text-3xl text-purple-200" />
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Course Management */}
-      <div className="py-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Filters */}
-          <div className="card p-6 mb-8">
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="flex-1">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaSearch className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search courses..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  {categories.map(category => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-
-                <button className="btn-secondary">
-                  <FaDownload className="mr-2" />
-                  Export
-                </button>
-              </div>
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 md:col-span-3">
+            <div className="bg-white rounded-xl shadow-lg p-4 sticky top-6">
+              <nav className="space-y-2">
+                <TabButton tab="overview" icon={FaChartLine} label="Overview" />
+                <TabButton tab="alldata" icon={FaDatabase} label="All Data" />
+                <TabButton tab="users" icon={FaUsers} label="Users" />
+                <TabButton tab="certificates" icon={FaCertificate} label="Certificates" />
+                <TabButton tab="courses" icon={FaBookOpen} label="Courses" />
+                <TabButton tab="settings" icon={FaCog} label="Settings" />
+              </nav>
             </div>
           </div>
 
-          {/* Course Table */}
-          <div className="card overflow-hidden">
-            <div className="px-6 py-4 border-b bg-gray-50">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Course Management ({filteredCourses.length} courses)
-              </h2>
-            </div>
+          <div className="col-span-12 md:col-span-9">
+            {activeTab === 'overview' && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Dashboard Overview</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <StatCard icon={FaUsers} title="Total Users" value={stats.totalUsers} color="bg-blue-500" bgColor="bg-blue-50" />
+                  <StatCard icon={FaUserGraduate} title="Total Enrollments" value={stats.totalEnrollments} color="bg-green-500" bgColor="bg-green-50" />
+                  <StatCard icon={FaCertificate} title="Certificates Issued" value={stats.totalCertificates} color="bg-purple-500" bgColor="bg-purple-50" />
+                  <StatCard icon={FaBookOpen} title="Total Courses" value={stats.totalCourses} color="bg-orange-500" bgColor="bg-orange-50" />
+                  <StatCard icon={FaMoneyBillWave} title="Revenue" value={`₹${stats.revenue.toLocaleString()}`} color="bg-pink-500" bgColor="bg-pink-50" />
+                  <StatCard icon={FaChartLine} title="Growth" value="+24%" color="bg-indigo-500" bgColor="bg-indigo-50" />
+                </div>
 
-            {filteredCourses.length === 0 ? (
-              <div className="p-8 text-center">
-                <FaBook className="mx-auto text-4xl text-gray-300 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No courses found</h3>
-                <p className="text-gray-600">
-                  {courses.length === 0 ? 'Create your first course to get started' : 'Try adjusting your search filters'}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Course
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Category
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Students
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Price
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Rating
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredCourses.map((course) => (
-                      <tr key={course._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <img
-                              className="h-12 w-12 rounded-lg object-cover"
-                              src={course.thumbnail || `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=60&h=60&fit=crop&crop=center`}
-                              alt={course.title}
-                            />
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {course.title}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                by {course.instructor}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCategoryColor(course.category)}`}>
-                            {course.category.replace('-', ' ')}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <div className="flex items-center">
-                            <FaUsers className="mr-1 text-gray-400" />
-                            {course.enrolledCount || 0}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {course.price === 0 ? (
-                            <span className="text-green-600 font-medium">Free</span>
-                          ) : (
-                            <span className="font-medium">${course.price}</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <div className="flex items-center">
-                            <FaStar className="mr-1 text-yellow-400" />
-                            {course.rating || 'N/A'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            course.isActive 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {course.isActive ? 'Published' : 'Draft'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => window.open(`/course/${course._id}`, '_blank')}
-                              className="text-blue-600 hover:text-blue-900"
-                              title="View Course"
-                            >
-                              <FaEye />
-                            </button>
-                            <button
-                              onClick={() => {/* Handle edit */}}
-                              className="text-yellow-600 hover:text-yellow-900"
-                              title="Edit Course"
-                            >
-                              <FaEdit />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCourse(course._id)}
-                              className="text-red-600 hover:text-red-900"
-                              title="Delete Course"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onClick={() => setActiveTab('courses')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg">
+                      <FaPlus /><span className="font-medium">Add New Course</span>
+                    </button>
+                    <button onClick={() => setActiveTab('alldata')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-4 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg">
+                      <FaDatabase /><span className="font-medium">View All Data</span>
+                    </button>
+                    <button onClick={() => setActiveTab('users')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg">
+                      <FaUsers /><span className="font-medium">Manage Users</span>
+                    </button>
+                    <button onClick={() => setActiveTab('certificates')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-4 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg">
+                      <FaEdit /><span className="font-medium">View Certificates</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Activity</h3>
+                  <div className="space-y-3">
+                    {allUsers.slice(0, 5).map((u, idx) => (
+                      <div key={idx} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <p className="text-gray-700">New user registered: {u.email}</p>
+                        <span className="text-xs text-gray-500 ml-auto">Recently</span>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'alldata' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">All Data - Complete Overview</h2>
+                  <button className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                    <FaDownload /><span>Export Data</span>
+                  </button>
+                </div>
+
+                <div className="relative mb-6">
+                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input type="text" placeholder="Search users by name or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollments</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Certificates</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredUsers.map((user) => {
+                        const userCerts = certificates.filter(c => c.userId === user.id);
+                        return (
+                          <tr key={user.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><div className="flex items-center"><FaEnvelope className="mr-2 text-gray-400" />{user.email}</div></td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email.split('@')[0]}</td>
+                            <td className="px-6 py-4 whitespace-nowrap"><span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{user.enrollmentCount} courses</span></td>
+                            <td className="px-6 py-4 whitespace-nowrap"><span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">{userCerts.length} certs</span></td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex items-center space-x-3">
+                                <button onClick={() => toast.success(`Viewing details for ${user.name}`)} className="text-blue-600 hover:text-blue-900" title="View Details"><FaEye /></button>
+                                <button onClick={() => handleDeleteUser(user.id)} className="text-red-600 hover:text-red-900" title="Delete User"><FaTrash /></button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {filteredUsers.length === 0 && (
+                    <div className="text-center py-12"><FaUsers className="mx-auto text-6xl text-gray-300 mb-4" /><p className="text-gray-500 text-lg">No users found</p></div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'users' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">User Management</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {allUsers.map((user) => (
+                    <div key={user.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-200">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">{user.name.charAt(0)}</div>
+                        <div><h3 className="font-semibold text-gray-900">{user.name}</h3><p className="text-sm text-gray-500">{user.email}</p></div>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <p className="text-gray-600"><span className="font-medium">Enrollments:</span> {user.enrollmentCount}</p>
+                        <p className="text-gray-600"><span className="font-medium">Role:</span> Student</p>
+                      </div>
+                      <button onClick={() => handleDeleteUser(user.id)} className="mt-4 w-full bg-red-50 text-red-600 py-2 rounded-lg hover:bg-red-100 transition-colors">Delete User</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'certificates' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Certificate Management</h2>
+                <div className="space-y-4">
+                  {certificates.map((cert, idx) => (
+                    <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-all duration-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{cert.courseName}</h3>
+                          <p className="text-sm text-gray-500">Student ID: {cert.userId}</p>
+                          <p className="text-sm text-gray-500">Issued: {new Date(cert.issuedDate).toLocaleDateString()}</p>
+                        </div>
+                        <div className="text-right"><span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Score: {cert.score}%</span></div>
+                      </div>
+                    </div>
+                  ))}
+                  {certificates.length === 0 && (
+                    <div className="text-center py-12"><FaCertificate className="mx-auto text-6xl text-gray-300 mb-4" /><p className="text-gray-500 text-lg">No certificates issued yet</p></div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'courses' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Course Management</h2>
+                <div className="text-center py-12">
+                  <FaBookOpen className="mx-auto text-6xl text-gray-300 mb-4" />
+                  <p className="text-gray-500 text-lg mb-4">Course management features coming soon...</p>
+                  <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200"><FaPlus className="inline mr-2" />Add New Course</button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Admin Settings</h2>
+                <div className="space-y-6">
+                  <div><h3 className="font-semibold text-gray-900 mb-2">Account Information</h3><p className="text-gray-600">Name: {user?.name}</p><p className="text-gray-600">Email: {user?.email}</p><p className="text-gray-600">Role: Administrator</p></div>
+                  <div><h3 className="font-semibold text-gray-900 mb-2">System Settings</h3><p className="text-gray-500">Configure system-wide settings here...</p></div>
+                </div>
               </div>
             )}
           </div>
-
-          {/* Recent Activity */}
-          <div className="mt-8 grid lg:grid-cols-2 gap-8">
-            <div className="card p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Enrollments</h3>
-              <div className="space-y-4">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <div key={i} className="flex items-center space-x-3">
-                    <img
-                      src={`https://ui-avatars.com/api/?name=Student${i+1}&size=32&background=6366f1&color=ffffff`}
-                      alt="Student"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">Student {i + 1}</p>
-                      <p className="text-xs text-gray-500">enrolled in React Fundamentals</p>
-                    </div>
-                    <span className="text-xs text-gray-500">2h ago</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="card p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">System Analytics</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Daily Active Users</span>
-                  <span className="text-sm font-medium">1,234</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Course Completion Rate</span>
-                  <span className="text-sm font-medium">87%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Student Satisfaction</span>
-                  <span className="text-sm font-medium">4.8/5</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Monthly Revenue</span>
-                  <span className="text-sm font-medium">$12,450</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-
-      {/* Create Course Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Course</h2>
-            <p className="text-gray-600 mb-6">
-              This will redirect you to the course creation page where you can add all the details.
-            </p>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="btn-secondary flex-1"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowCreateModal(false);
-                  // Navigate to course creation page
-                  window.location.href = '/admin/course/create';
-                }}
-                className="btn-primary flex-1"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

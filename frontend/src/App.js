@@ -29,6 +29,8 @@ import SettingsPage from './pages/SettingsPage';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+import AdminSignup from './pages/AdminSignup';
 
 // Other Components
 import LoadingSpinner from './components/LoadingSpinner';
@@ -96,6 +98,10 @@ function App() {
           <Route path="/test-login" element={<TestLogin />} />
           <Route path="/register" element={<Register />} />
           
+          {/* Admin Auth Routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/signup" element={<AdminSignup />} />
+          
           {/* Protected Student Routes */}
           <Route 
             path="/dashboard" 
@@ -133,6 +139,14 @@ function App() {
           {/* Admin Routes */}
           <Route 
             path="/admin" 
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/dashboard" 
             element={
               <ProtectedRoute adminOnly={true}>
                 <AdminDashboard />

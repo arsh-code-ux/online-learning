@@ -38,15 +38,15 @@ const Navbar = () => {
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link 
             to="/" 
-            className="flex items-center space-x-2 text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
+            className="flex items-center space-x-3 text-3xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
             onClick={closeMobileMenu}
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <FaBook className="text-white text-sm" />
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <FaBook className="text-white text-xl" />
             </div>
             <span>LearnHub</span>
           </Link>
@@ -55,7 +55,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               to="/" 
-              className={`nav-link ${isActivePath('/') && location.pathname === '/' ? 'nav-link-active' : ''}`}
+              className={`nav-link text-lg ${isActivePath('/') && location.pathname === '/' ? 'nav-link-active' : ''}`}
             >
               <FaHome className="inline mr-1" />
               Home
@@ -63,7 +63,7 @@ const Navbar = () => {
             
             <Link 
               to="/courses" 
-              className={`nav-link ${isActivePath('/courses') ? 'nav-link-active' : ''}`}
+              className={`nav-link text-lg ${isActivePath('/courses') ? 'nav-link-active' : ''}`}
             >
               <FaBook className="inline mr-1" />
               Courses
@@ -71,14 +71,14 @@ const Navbar = () => {
             
             <Link 
               to="/about" 
-              className={`nav-link ${isActivePath('/about') ? 'nav-link-active' : ''}`}
+              className={`nav-link text-lg ${isActivePath('/about') ? 'nav-link-active' : ''}`}
             >
               About
             </Link>
             
             <Link 
               to="/contact" 
-              className={`nav-link ${isActivePath('/contact') ? 'nav-link-active' : ''}`}
+              className={`nav-link text-lg ${isActivePath('/contact') ? 'nav-link-active' : ''}`}
             >
               Contact
             </Link>
@@ -90,7 +90,7 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/dashboard" 
-                  className={`nav-link ${isActivePath('/dashboard') ? 'nav-link-active' : ''}`}
+                  className={`nav-link text-lg ${isActivePath('/dashboard') ? 'nav-link-active' : ''}`}
                 >
                   <FaTachometerAlt className="inline mr-1" />
                   Dashboard

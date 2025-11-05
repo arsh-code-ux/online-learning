@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fa';
 import SimpleVideoPlayer from './SimpleVideoPlayer';
 import Quiz from './Quiz';
+import { getQuizForCourse } from '../data/courseQuizzes';
 
 const CurriculumSection = ({ curriculum, isEnrolled = false }) => {
   const [expandedModule, setExpandedModule] = useState(null);
@@ -238,6 +239,26 @@ const CurriculumSection = ({ curriculum, isEnrolled = false }) => {
           border-radius: 12px;
           padding: 24px;
           border-left: 4px solid #3b82f6;
+          max-height: 600px;
+          overflow-y: auto;
+        }
+        
+        .written-content::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .written-content::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 4px;
+        }
+        
+        .written-content::-webkit-scrollbar-thumb {
+          background: #94a3b8;
+          border-radius: 4px;
+        }
+        
+        .written-content::-webkit-scrollbar-thumb:hover {
+          background: #64748b;
         }
         
         .written-content h3 {
@@ -767,6 +788,7 @@ const CurriculumSection = ({ curriculum, isEnrolled = false }) => {
         <div style={{ marginTop: '20px' }}>
           <Quiz
             courseId={curriculum.courseId}
+            questions={getQuizForCourse(curriculum.courseId)}
             onComplete={({ percent, passed }) => {
               setQuizTaken(passed);
               // store final course completion state

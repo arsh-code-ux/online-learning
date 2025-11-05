@@ -38,10 +38,19 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
         if (typeof ans === 'number' && ans === q.answer) correct += 1;
         autoCorrectCount += 1;
       } else if (q.type === 'essay') {
-        // simple keyword-match grading: count keywords present
-        const text = (ans || '').toLowerCase();
-        const found = q.keywords.filter(k => text.includes(k)).length;
-        const pass = found >= Math.max(1, Math.floor(q.keywords.length / 2));
+        // Enhanced keyword-match grading with length validation
+        const text = (ans || '').trim().toLowerCase();
+        
+        // Check if answer has minimum length (at least 50 characters for meaningful answer)
+        if (text.length < 50) {
+          return; // Not counted as correct if too short
+        }
+        
+        // Check keyword relevance - need at least 60% of keywords present
+        const found = q.keywords.filter(k => text.includes(k.toLowerCase())).length;
+        const requiredKeywords = Math.ceil(q.keywords.length * 0.6); // At least 60% keywords
+        const pass = found >= requiredKeywords;
+        
         if (pass) correct += 1;
       }
     });
@@ -51,17 +60,51 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
   };
 
   const handleSubmit = () => {
+    // Validate that all questions are answered
+    const unansweredMcq = questions.filter(q => q.type === 'mcq' && answers[q.id] === undefined).length;
+    const emptyEssays = questions.filter(q => q.type === 'essay' && (!answers[q.id] || answers[q.id].trim().length === 0)).length;
+    
+    if (unansweredMcq > 0 || emptyEssays > 0) {
+      toast.error('Please answer all questions before submitting!');
+      return;
+    }
+    
+    // Validate essay answers have minimum length and relevant content
+    const invalidEssays = questions.filter(q => {
+      if (q.type === 'essay') {
+        const ans = answers[q.id] || '';
+        const text = ans.trim().toLowerCase();
+        
+        // Must be at least 50 characters
+        if (text.length < 50) {
+          return true;
+        }
+        
+        // Must contain at least one keyword to be considered relevant
+        const hasKeyword = q.keywords.some(k => text.includes(k.toLowerCase()));
+        if (!hasKeyword) {
+          return true;
+        }
+      }
+      return false;
+    });
+    
+    if (invalidEssays.length > 0) {
+      toast.error('Please provide detailed and relevant answers to the essay questions (minimum 50 characters and related to the topic).');
+      return;
+    }
+    
     const { percent } = grade();
     setScorePercent(percent);
     setSubmitted(true);
 
-    const passed = percent >= 60; // pass threshold
+    const passed = percent >= 85; // pass threshold increased to 85%
 
     if (passed) {
       // Show name prompt before issuing certificate
       setShowNamePrompt(true);
     } else {
-      toast('Quiz submitted. You scored ' + percent + '%. Try again to earn certificate.');
+      toast('Quiz submitted. You scored ' + percent + '%. You need 85% to pass. Please review the course and try again.');
       // store progress even if failed
       const progress = JSON.parse(localStorage.getItem('courseProgress') || '{}');
       progress[courseId] = progress[courseId] || {};
@@ -114,7 +157,10 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
   return (
     <div className="bg-white rounded-lg p-6 shadow-md">
       <h3 className="text-xl font-semibold mb-4">Final Quiz</h3>
-      <p className="text-sm text-gray-600 mb-4">Answer all questions. Two questions are short-answer; write 2-3 sentences. Passing score: 60%</p>
+      <p className="text-sm text-gray-600 mb-4">
+        Answer all questions carefully. Essay questions require detailed answers (minimum 50 characters) that are relevant to the topic. 
+        <strong> Passing score: 85%</strong>
+      </p>
 
       {questions.map((q, idx) => (
         <div key={q.id} className="mb-4">
@@ -128,25 +174,35 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
                     name={q.id}
                     checked={answers[q.id] === oi}
                     onChange={() => handleChange(q.id, oi)}
+                    disabled={submitted}
                   />
                   <span>{opt}</span>
                 </label>
               ))}
             </div>
           ) : (
-            <textarea
-              rows={4}
-              value={answers[q.id] || ''}
-              onChange={(e) => handleChange(q.id, e.target.value)}
-              className="w-full p-2 border rounded"
-            />
+            <div>
+              <textarea
+                rows={4}
+                value={answers[q.id] || ''}
+                onChange={(e) => handleChange(q.id, e.target.value)}
+                disabled={submitted}
+                placeholder="Write a detailed answer (minimum 50 characters)..."
+                className="w-full p-2 border rounded"
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                Characters: {(answers[q.id] || '').length} / 50 minimum
+              </div>
+            </div>
           )}
         </div>
       ))}
 
       {!submitted ? (
         <div className="flex gap-3">
-          <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded">Submit Quiz</button>
+          <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Submit Quiz
+          </button>
         </div>
       ) : showNamePrompt ? (
         <div className="bg-green-50 border border-green-200 rounded-lg p-6">
@@ -175,10 +231,10 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
       ) : (
         <div>
           <div className="mb-2">Your score: <strong>{scorePercent}%</strong></div>
-          {scorePercent >= 60 ? (
+          {scorePercent >= 85 ? (
             <div className="text-green-600 font-semibold">Certificate has been issued! Check the Certificates page.</div>
           ) : (
-            <div className="text-yellow-600">You did not pass. Review the course and try again.</div>
+            <div className="text-yellow-600">You scored {scorePercent}%, but need 85% to pass. Please review the course and try again.</div>
           )}
         </div>
       )}
