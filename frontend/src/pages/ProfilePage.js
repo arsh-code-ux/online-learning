@@ -803,12 +803,12 @@ const ProfilePage = () => {
         <div className="stat-card bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-100 text-sm font-medium mb-1">Courses Completed</p>
-              <p className="text-3xl font-bold">12</p>
-              <p className="text-blue-200 text-xs mt-1">+3 this month</p>
+              <p className="text-white text-sm font-bold mb-1">Courses Completed</p>
+              <p className="text-4xl font-bold text-white">12</p>
+              <p className="text-white text-sm font-semibold mt-1">+3 this month</p>
             </div>
             <div className="bg-white/20 p-4 rounded-full">
-              <FaGraduationCap className="text-3xl" />
+              <FaGraduationCap className="text-3xl text-white" />
             </div>
           </div>
         </div>
@@ -816,12 +816,12 @@ const ProfilePage = () => {
         <div className="stat-card bg-gradient-to-br from-yellow-400 via-yellow-500 to-orange-500 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-yellow-100 text-sm font-medium mb-1">Certificates Earned</p>
-              <p className="text-3xl font-bold">8</p>
-              <p className="text-yellow-200 text-xs mt-1">+2 this week</p>
+              <p className="text-white text-sm font-bold mb-1">Certificates Earned</p>
+              <p className="text-4xl font-bold text-white">8</p>
+              <p className="text-white text-sm font-semibold mt-1">+2 this week</p>
             </div>
             <div className="bg-white/20 p-4 rounded-full">
-              <FaCertificate className="text-3xl" />
+              <FaCertificate className="text-3xl text-white" />
             </div>
           </div>
         </div>
@@ -829,12 +829,12 @@ const ProfilePage = () => {
         <div className="stat-card bg-gradient-to-br from-green-500 via-green-600 to-teal-600 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-100 text-sm font-medium mb-1">Learning Streak</p>
-              <p className="text-3xl font-bold">15</p>
-              <p className="text-green-200 text-xs mt-1">days in a row</p>
+              <p className="text-white text-sm font-bold mb-1">Learning Streak</p>
+              <p className="text-4xl font-bold text-white">15</p>
+              <p className="text-white text-sm font-semibold mt-1">days in a row</p>
             </div>
             <div className="bg-white/20 p-4 rounded-full">
-              <FaClock className="text-3xl" />
+              <FaClock className="text-3xl text-white" />
             </div>
           </div>
         </div>
