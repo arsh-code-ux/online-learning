@@ -23,6 +23,22 @@ const AdminDashboard = () => {
     revenue: 0,
     blockedAccounts: 0
   });
+  
+  // Courses Management States
+  const [courses, setCourses] = useState([]);
+  const [showCourseForm, setShowCourseForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [courseForm, setCourseForm] = useState({
+    title: '',
+    description: '',
+    category: 'soft-skills',
+    price: 0,
+    isPremium: false,
+    instructor: user?.name || 'Admin',
+    duration: '',
+    level: 'beginner',
+    thumbnail: ''
+  });
   const [allUsers, setAllUsers] = useState([]);
   const [certificates, setCertificates] = useState([]);
 
@@ -33,6 +49,7 @@ const AdminDashboard = () => {
       return;
     }
     loadAllData();
+    loadCourses();
   }, [user, navigate]);
 
   const loadAllData = () => {
@@ -59,11 +76,13 @@ const AdminDashboard = () => {
     setAllUsers(usersWithEnrollments);
     setCertificates(certs);
 
+    const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+
     setStats({
       totalUsers: usersWithEnrollments.length,
       totalEnrollments,
       totalCertificates: certs.length,
-      totalCourses: 5,
+      totalCourses: adminCourses.length,
       revenue: premiumCourses.length * 999,
       blockedAccounts: blocked.length
     });
@@ -93,6 +112,108 @@ const AdminDashboard = () => {
       loadAllData();
       toast.success(`✅ ${email} has been unblocked!`);
     }
+  };
+
+  // Course Management Functions
+  const loadCourses = () => {
+    const storedCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    setCourses(storedCourses);
+  };
+
+  const handleCourseFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setCourseForm({
+      ...courseForm,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const handleSaveCourse = (e) => {
+    e.preventDefault();
+    
+    if (!courseForm.title.trim()) {
+      toast.error('Course title is required');
+      return;
+    }
+
+    if (!courseForm.description.trim()) {
+      toast.error('Course description is required');
+      return;
+    }
+
+    const storedCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+    
+    if (editingCourse) {
+      // Update existing course
+      const updatedCourses = storedCourses.map(course =>
+        course.id === editingCourse.id ? { ...courseForm, id: editingCourse.id } : course
+      );
+      localStorage.setItem('adminCourses', JSON.stringify(updatedCourses));
+      toast.success('Course updated successfully! 🎉');
+    } else {
+      // Add new course
+      const newCourse = {
+        ...courseForm,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        students: 0,
+        rating: 0
+      };
+      storedCourses.push(newCourse);
+      localStorage.setItem('adminCourses', JSON.stringify(storedCourses));
+      toast.success('Course added successfully! 🎉');
+    }
+
+    // Reset form and reload
+    setCourseForm({
+      title: '',
+      description: '',
+      category: 'soft-skills',
+      price: 0,
+      isPremium: false,
+      instructor: user?.name || 'Admin',
+      duration: '',
+      level: 'beginner',
+      thumbnail: ''
+    });
+    setEditingCourse(null);
+    setShowCourseForm(false);
+    loadCourses();
+    loadAllData();
+  };
+
+  const handleEditCourse = (course) => {
+    setCourseForm(course);
+    setEditingCourse(course);
+    setShowCourseForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteCourse = (courseId) => {
+    if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+      const storedCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+      const updatedCourses = storedCourses.filter(course => course.id !== courseId);
+      localStorage.setItem('adminCourses', JSON.stringify(updatedCourses));
+      loadCourses();
+      loadAllData();
+      toast.success('Course deleted successfully');
+    }
+  };
+
+  const handleCancelCourseForm = () => {
+    setCourseForm({
+      title: '',
+      description: '',
+      category: 'soft-skills',
+      price: 0,
+      isPremium: false,
+      instructor: user?.name || 'Admin',
+      duration: '',
+      level: 'beginner',
+      thumbnail: ''
+    });
+    setEditingCourse(null);
+    setShowCourseForm(false);
   };
 
   const StatCard = ({ icon: Icon, title, value, color, bgColor }) => (
@@ -429,12 +550,285 @@ const AdminDashboard = () => {
 
             {activeTab === 'courses' && (
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Course Management</h2>
-                <div className="text-center py-12">
-                  <FaBookOpen className="mx-auto text-6xl text-gray-300 mb-4" />
-                  <p className="text-gray-500 text-lg mb-4">Course management features coming soon...</p>
-                  <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200"><FaPlus className="inline mr-2" />Add New Course</button>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">Course Management</h2>
+                  <button
+                    onClick={() => setShowCourseForm(!showCourseForm)}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg"
+                  >
+                    <FaPlus />
+                    <span>{showCourseForm ? 'Cancel' : 'Add New Course'}</span>
+                  </button>
                 </div>
+
+                {/* Course Form */}
+                {showCourseForm && (
+                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 mb-6 border-2 border-blue-200">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">
+                      {editingCourse ? '✏️ Edit Course' : '➕ Create New Course'}
+                    </h3>
+                    <form onSubmit={handleSaveCourse} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Course Title */}
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Course Title *
+                          </label>
+                          <input
+                            type="text"
+                            name="title"
+                            value={courseForm.title}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            placeholder="e.g., Introduction to React"
+                            required
+                          />
+                        </div>
+
+                        {/* Category */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Category *
+                          </label>
+                          <select
+                            name="category"
+                            value={courseForm.category}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            required
+                          >
+                            <option value="soft-skills">Soft Skills</option>
+                            <option value="technical-skills">Technical Skills</option>
+                            <option value="analytical-skills">Analytical Skills</option>
+                          </select>
+                        </div>
+
+                        {/* Level */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Level *
+                          </label>
+                          <select
+                            name="level"
+                            value={courseForm.level}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            required
+                          >
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                          </select>
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Duration
+                          </label>
+                          <input
+                            type="text"
+                            name="duration"
+                            value={courseForm.duration}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            placeholder="e.g., 4 weeks, 20 hours"
+                          />
+                        </div>
+
+                        {/* Price */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Price ($)
+                          </label>
+                          <input
+                            type="number"
+                            name="price"
+                            value={courseForm.price}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
+
+                        {/* Instructor */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Instructor
+                          </label>
+                          <input
+                            type="text"
+                            name="instructor"
+                            value={courseForm.instructor}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            placeholder="Instructor name"
+                          />
+                        </div>
+
+                        {/* Thumbnail URL */}
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Thumbnail URL
+                          </label>
+                          <input
+                            type="url"
+                            name="thumbnail"
+                            value={courseForm.thumbnail}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            placeholder="https://example.com/image.jpg"
+                          />
+                        </div>
+
+                        {/* Description */}
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Description *
+                          </label>
+                          <textarea
+                            name="description"
+                            value={courseForm.description}
+                            onChange={handleCourseFormChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 transition"
+                            rows="4"
+                            placeholder="Course description..."
+                            required
+                          />
+                        </div>
+
+                        {/* Premium Toggle */}
+                        <div className="md:col-span-2">
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="isPremium"
+                              checked={courseForm.isPremium}
+                              onChange={handleCourseFormChange}
+                              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <span className="text-sm font-semibold text-gray-700">
+                              🌟 Premium Course (Requires Payment)
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Form Actions */}
+                      <div className="flex justify-end space-x-3 pt-4 border-t">
+                        <button
+                          type="button"
+                          onClick={handleCancelCourseForm}
+                          className="px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 transition shadow-lg"
+                        >
+                          {editingCourse ? '💾 Update Course' : '✅ Create Course'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {/* Courses List */}
+                {courses.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FaBookOpen className="mx-auto text-6xl text-gray-300 mb-4" />
+                    <p className="text-gray-500 text-lg mb-4">
+                      No courses yet. Create your first course!
+                    </p>
+                    <button
+                      onClick={() => setShowCourseForm(true)}
+                      className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg inline-flex items-center space-x-2"
+                    >
+                      <FaPlus />
+                      <span>Add Your First Course</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {courses.map((course) => (
+                      <div
+                        key={course.id}
+                        className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-blue-300"
+                      >
+                        {/* Course Thumbnail */}
+                        <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center relative">
+                          {course.thumbnail ? (
+                            <img
+                              src={course.thumbnail}
+                              alt={course.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <FaBookOpen className="text-6xl text-white opacity-50" />
+                          )}
+                          {course.isPremium && (
+                            <span className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
+                              ⭐ Premium
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Course Info */}
+                        <div className="p-4">
+                          <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+                            {course.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                            {course.description}
+                          </p>
+
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between text-xs text-gray-600">
+                              <span className="font-semibold">Category:</span>
+                              <span className="capitalize">{course.category.replace('-', ' ')}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-gray-600">
+                              <span className="font-semibold">Level:</span>
+                              <span className="capitalize">{course.level}</span>
+                            </div>
+                            {course.duration && (
+                              <div className="flex items-center justify-between text-xs text-gray-600">
+                                <span className="font-semibold">Duration:</span>
+                                <span>{course.duration}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between text-xs text-gray-600">
+                              <span className="font-semibold">Price:</span>
+                              <span className="text-green-600 font-bold">
+                                {course.price > 0 ? `$${course.price}` : 'Free'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleEditCourse(course)}
+                              className="flex-1 flex items-center justify-center space-x-1 bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition text-sm"
+                            >
+                              <FaEdit />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCourse(course.id)}
+                              className="flex-1 flex items-center justify-center space-x-1 bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition text-sm"
+                            >
+                              <FaTrash />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
