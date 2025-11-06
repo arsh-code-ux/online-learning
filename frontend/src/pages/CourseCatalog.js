@@ -309,25 +309,6 @@ const CourseCatalog = () => {
           </div>
         </div>
       </section>
-                    <div className="text-2xl font-bold text-white">100%</div>
-                    <div className="text-blue-200 text-sm">Certified</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <span className="text-3xl">🆓</span>
-                  <div className="text-left">
-                    <div className="text-2xl font-bold text-white">{courses?.filter(course => course.price === 0).length || 4}</div>
-                    <div className="text-blue-200 text-sm">Free Courses</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Filters & Search Section */}
       <section className="relative py-12 px-4 bg-gradient-to-r from-white via-blue-50 to-purple-50 border-b border-blue-200">
