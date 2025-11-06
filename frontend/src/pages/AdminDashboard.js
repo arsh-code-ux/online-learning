@@ -46,7 +46,20 @@ const AdminDashboard = () => {
     instructor: user?.name || 'Admin',
     duration: '',
     level: 'beginner',
-    thumbnail: ''
+    thumbnail: '',
+    modules: []
+  });
+  const [currentModule, setCurrentModule] = useState({
+    moduleNumber: 1,
+    title: '',
+    description: '',
+    videos: []
+  });
+  const [currentVideo, setCurrentVideo] = useState({
+    title: '',
+    url: '',
+    duration: '',
+    summary: ''
   });
   const [allUsers, setAllUsers] = useState([]);
   const [certificates, setCertificates] = useState([]);
@@ -320,6 +333,70 @@ const AdminDashboard = () => {
     });
   };
 
+  // Module and Video Management Functions
+  const handleAddVideo = () => {
+    if (!currentVideo.title.trim() || !currentVideo.url.trim()) {
+      toast.error('Video title and URL are required');
+      return;
+    }
+
+    setCurrentModule({
+      ...currentModule,
+      videos: [...currentModule.videos, { ...currentVideo, id: Date.now().toString() }]
+    });
+
+    setCurrentVideo({
+      title: '',
+      url: '',
+      duration: '',
+      summary: ''
+    });
+
+    toast.success('✅ Video added to module');
+  };
+
+  const handleRemoveVideo = (videoId) => {
+    setCurrentModule({
+      ...currentModule,
+      videos: currentModule.videos.filter(v => v.id !== videoId)
+    });
+    toast.success('✅ Video removed');
+  };
+
+  const handleAddModule = () => {
+    if (!currentModule.title.trim()) {
+      toast.error('Module title is required');
+      return;
+    }
+
+    if (currentModule.videos.length === 0) {
+      toast.error('Add at least one video to the module');
+      return;
+    }
+
+    setCourseForm({
+      ...courseForm,
+      modules: [...courseForm.modules, { ...currentModule, id: Date.now().toString() }]
+    });
+
+    setCurrentModule({
+      moduleNumber: courseForm.modules.length + 2,
+      title: '',
+      description: '',
+      videos: []
+    });
+
+    toast.success('✅ Module added to course');
+  };
+
+  const handleRemoveModule = (moduleId) => {
+    setCourseForm({
+      ...courseForm,
+      modules: courseForm.modules.filter(m => m.id !== moduleId)
+    });
+    toast.success('✅ Module removed');
+  };
+
   const handleSaveCourse = (e) => {
     e.preventDefault();
     
@@ -330,6 +407,11 @@ const AdminDashboard = () => {
 
     if (!courseForm.description.trim()) {
       toast.error('Course description is required');
+      return;
+    }
+
+    if (courseForm.modules.length === 0) {
+      toast.error('Add at least one module with videos to the course');
       return;
     }
 
@@ -347,13 +429,15 @@ const AdminDashboard = () => {
         id: Date.now().toString(),
         createdAt: new Date().toISOString(),
         students: 0,
-        rating: 0
+        rating: 0,
+        enrolled: []
       };
       storedCourses.push(newCourse);
       localStorage.setItem('adminCourses', JSON.stringify(storedCourses));
       toast.success('✅ Course added successfully!');
     }
 
+    // Reset form
     setCourseForm({
       title: '',
       description: '',
@@ -363,7 +447,20 @@ const AdminDashboard = () => {
       instructor: user?.name || 'Admin',
       duration: '',
       level: 'beginner',
-      thumbnail: ''
+      thumbnail: '',
+      modules: []
+    });
+    setCurrentModule({
+      moduleNumber: 1,
+      title: '',
+      description: '',
+      videos: []
+    });
+    setCurrentVideo({
+      title: '',
+      url: '',
+      duration: '',
+      summary: ''
     });
     setEditingCourse(null);
     setShowCourseForm(false);
@@ -376,6 +473,12 @@ const AdminDashboard = () => {
     setEditingCourse(course);
     setShowCourseForm(true);
     setActiveTab('courses');
+    setCurrentModule({
+      moduleNumber: (course.modules?.length || 0) + 1,
+      title: '',
+      description: '',
+      videos: []
+    });
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
   };
 
@@ -400,7 +503,20 @@ const AdminDashboard = () => {
       instructor: user?.name || 'Admin',
       duration: '',
       level: 'beginner',
-      thumbnail: ''
+      thumbnail: '',
+      modules: []
+    });
+    setCurrentModule({
+      moduleNumber: 1,
+      title: '',
+      description: '',
+      videos: []
+    });
+    setCurrentVideo({
+      title: '',
+      url: '',
+      duration: '',
+      summary: ''
     });
     setEditingCourse(null);
     setShowCourseForm(false);
@@ -833,6 +949,272 @@ const AdminDashboard = () => {
                           <span>🌟 Premium Course (Requires Payment)</span>
                         </label>
                       </div>
+                    </div>
+
+                    {/* Modules Management Section */}
+                    <div className="modules-section" style={{marginTop: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', border: '2px dashed #cbd5e1'}}>
+                      <h4 style={{fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem', color: '#1e293b'}}>
+                        📚 Course Modules & Content
+                      </h4>
+
+                      {/* Current Module Form */}
+                      <div style={{background: 'white', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid #e2e8f0'}}>
+                        <h5 style={{fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', color: '#334155'}}>
+                          Module {currentModule.moduleNumber}
+                        </h5>
+                        
+                        <div style={{display: 'grid', gap: '1rem'}}>
+                          <div>
+                            <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem', color: '#475569'}}>
+                              Module Title *
+                            </label>
+                            <input
+                              type="text"
+                              value={currentModule.title}
+                              onChange={(e) => setCurrentModule({...currentModule, title: e.target.value})}
+                              className="form-input"
+                              placeholder="e.g., Introduction to React"
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem', color: '#475569'}}>
+                              Module Description
+                            </label>
+                            <textarea
+                              value={currentModule.description}
+                              onChange={(e) => setCurrentModule({...currentModule, description: e.target.value})}
+                              className="form-textarea"
+                              rows="2"
+                              placeholder="Brief description of what this module covers..."
+                            />
+                          </div>
+
+                          {/* Video Addition Section */}
+                          <div style={{background: '#f1f5f9', padding: '1rem', borderRadius: '8px'}}>
+                            <h6 style={{fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem', color: '#334155'}}>
+                              🎥 Add Videos to Module
+                            </h6>
+                            
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem'}}>
+                              <div>
+                                <label style={{display: 'block', marginBottom: '0.25rem', fontWeight: '500', fontSize: '0.8rem', color: '#64748b'}}>
+                                  Video Title *
+                                </label>
+                                <input
+                                  type="text"
+                                  value={currentVideo.title}
+                                  onChange={(e) => setCurrentVideo({...currentVideo, title: e.target.value})}
+                                  className="form-input"
+                                  placeholder="e.g., Understanding JSX"
+                                  style={{padding: '0.5rem'}}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{display: 'block', marginBottom: '0.25rem', fontWeight: '500', fontSize: '0.8rem', color: '#64748b'}}>
+                                  Video URL * (YouTube/Drive)
+                                </label>
+                                <input
+                                  type="url"
+                                  value={currentVideo.url}
+                                  onChange={(e) => setCurrentVideo({...currentVideo, url: e.target.value})}
+                                  className="form-input"
+                                  placeholder="https://youtube.com/..."
+                                  style={{padding: '0.5rem'}}
+                                />
+                              </div>
+
+                              <div>
+                                <label style={{display: 'block', marginBottom: '0.25rem', fontWeight: '500', fontSize: '0.8rem', color: '#64748b'}}>
+                                  Duration (e.g., 15:30)
+                                </label>
+                                <input
+                                  type="text"
+                                  value={currentVideo.duration}
+                                  onChange={(e) => setCurrentVideo({...currentVideo, duration: e.target.value})}
+                                  className="form-input"
+                                  placeholder="10:45"
+                                  style={{padding: '0.5rem'}}
+                                />
+                              </div>
+
+                              <div style={{gridColumn: 'span 2'}}>
+                                <label style={{display: 'block', marginBottom: '0.25rem', fontWeight: '500', fontSize: '0.8rem', color: '#64748b'}}>
+                                  Video Summary
+                                </label>
+                                <textarea
+                                  value={currentVideo.summary}
+                                  onChange={(e) => setCurrentVideo({...currentVideo, summary: e.target.value})}
+                                  className="form-textarea"
+                                  rows="2"
+                                  placeholder="Brief summary of video content..."
+                                  style={{padding: '0.5rem'}}
+                                />
+                              </div>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={handleAddVideo}
+                              style={{
+                                padding: '0.5rem 1rem',
+                                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                              }}
+                            >
+                              <FaPlus /> Add Video to Module
+                            </button>
+
+                            {/* Videos List */}
+                            {currentModule.videos.length > 0 && (
+                              <div style={{marginTop: '1rem'}}>
+                                <p style={{fontWeight: '600', fontSize: '0.875rem', marginBottom: '0.5rem', color: '#334155'}}>
+                                  Videos in this module ({currentModule.videos.length}):
+                                </p>
+                                <div style={{display: 'grid', gap: '0.5rem'}}>
+                                  {currentModule.videos.map((video, index) => (
+                                    <div key={video.id} style={{
+                                      display: 'flex',
+                                      justifyContent: 'space-between',
+                                      alignItems: 'center',
+                                      padding: '0.75rem',
+                                      background: 'white',
+                                      borderRadius: '6px',
+                                      border: '1px solid #e2e8f0'
+                                    }}>
+                                      <div style={{flex: 1}}>
+                                        <p style={{fontWeight: '600', fontSize: '0.875rem', color: '#1e293b'}}>
+                                          {index + 1}. {video.title}
+                                        </p>
+                                        <p style={{fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem'}}>
+                                          Duration: {video.duration || 'Not specified'}
+                                        </p>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveVideo(video.id)}
+                                        style={{
+                                          padding: '0.5rem 0.75rem',
+                                          background: '#fee2e2',
+                                          color: '#dc2626',
+                                          border: 'none',
+                                          borderRadius: '6px',
+                                          fontSize: '0.875rem',
+                                          fontWeight: '600',
+                                          cursor: 'pointer'
+                                        }}
+                                      >
+                                        <FaTrash />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleAddModule}
+                            disabled={!currentModule.title || currentModule.videos.length === 0}
+                            style={{
+                              padding: '0.75rem 1.5rem',
+                              background: currentModule.title && currentModule.videos.length > 0 
+                                ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                                : '#e2e8f0',
+                              color: currentModule.title && currentModule.videos.length > 0 ? 'white' : '#94a3b8',
+                              border: 'none',
+                              borderRadius: '8px',
+                              fontWeight: '700',
+                              fontSize: '1rem',
+                              cursor: currentModule.title && currentModule.videos.length > 0 ? 'pointer' : 'not-allowed',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem',
+                              width: '100%'
+                            }}
+                          >
+                            <FaPlus /> Add Module to Course
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Added Modules List */}
+                      {courseForm.modules.length > 0 && (
+                        <div>
+                          <h5 style={{fontSize: '1.1rem', fontWeight: '700', marginBottom: '1rem', color: '#1e293b'}}>
+                            ✅ Course Modules ({courseForm.modules.length})
+                          </h5>
+                          <div style={{display: 'grid', gap: '1rem'}}>
+                            {courseForm.modules.map((module, moduleIndex) => (
+                              <div key={module.id} style={{
+                                background: 'white',
+                                padding: '1.25rem',
+                                borderRadius: '12px',
+                                border: '2px solid #e2e8f0'
+                              }}>
+                                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem'}}>
+                                  <div style={{flex: 1}}>
+                                    <h6 style={{fontSize: '1rem', fontWeight: '700', color: '#1e293b', marginBottom: '0.25rem'}}>
+                                      Module {moduleIndex + 1}: {module.title}
+                                    </h6>
+                                    {module.description && (
+                                      <p style={{fontSize: '0.875rem', color: '#64748b'}}>
+                                        {module.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveModule(module.id)}
+                                    style={{
+                                      padding: '0.5rem 0.75rem',
+                                      background: '#fee2e2',
+                                      color: '#dc2626',
+                                      border: 'none',
+                                      borderRadius: '6px',
+                                      fontSize: '0.875rem',
+                                      fontWeight: '600',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    <FaTrash /> Remove
+                                  </button>
+                                </div>
+                                
+                                <div style={{marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0'}}>
+                                  <p style={{fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem'}}>
+                                    📹 Videos ({module.videos.length}):
+                                  </p>
+                                  <ul style={{listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '0.5rem'}}>
+                                    {module.videos.map((video, videoIndex) => (
+                                      <li key={video.id} style={{
+                                        padding: '0.5rem 0.75rem',
+                                        background: '#f8fafc',
+                                        borderRadius: '6px',
+                                        fontSize: '0.875rem',
+                                        color: '#334155'
+                                      }}>
+                                        {videoIndex + 1}. {video.title} {video.duration && `(${video.duration})`}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="form-actions">

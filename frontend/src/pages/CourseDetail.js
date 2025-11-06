@@ -598,7 +598,31 @@ const CourseDetail = () => {
             {/* Main Content - scrollable container */}
             <div className="lg:col-span-2 space-y-12 max-h-[calc(100vh-200px)] overflow-y-auto pr-4" style={{ scrollBehavior: 'smooth' }}>
               {/* Course Curriculum with Video + Content */}
-              <CurriculumSection curriculum={curriculum} isEnrolled={isEnrolled} />
+              {displayCourse.modules && displayCourse.modules.length > 0 ? (
+                <CurriculumSection 
+                  curriculum={{
+                    ...curriculum,
+                    courseId: displayCourse.id || id,
+                    modules: displayCourse.modules.map((module, index) => ({
+                      id: module.id || `module-${index}`,
+                      title: module.title,
+                      description: module.description,
+                      duration: module.duration || 'Variable',
+                      lessons: module.videos.map((video, videoIndex) => ({
+                        id: video.id || `video-${videoIndex}`,
+                        title: video.title,
+                        videoUrl: video.url,
+                        duration: video.duration || '10:00',
+                        summary: video.summary || video.title,
+                        completed: false
+                      }))
+                    }))
+                  }} 
+                  isEnrolled={isEnrolled} 
+                />
+              ) : (
+                <CurriculumSection curriculum={curriculum} isEnrolled={isEnrolled} />
+              )}
 
               {/* Course Description */}
               <div className="enhanced-card p-8">
