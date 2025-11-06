@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }) => {
           payload: user,
         });
         
-        toast.success(`Welcome back, ${user.firstName}!`);
+        toast.success(`Welcome back, ${user.name || user.firstName || 'User'}!`);
         return { success: true, user };
       }
     } catch (error) {
@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }) => {
           payload: user,
         });
         
-        toast.success(`Welcome to our platform, ${user.firstName}!`);
+        toast.success(`Welcome to our platform, ${user.name || user.firstName || 'User'}!`);
         return { success: true, user };
       }
     } catch (error) {

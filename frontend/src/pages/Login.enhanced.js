@@ -35,12 +35,8 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Pass credentials as object
-      const result = await login({ email: formData.email, password: formData.password });
-      
-      if (result && result.success) {
-        toast.success('Login successful!');
-      }
+      await login(formData.email, formData.password);
+      toast.success('Login successful!');
     } catch (error) {
       toast.error(error.message || 'Login failed');
     } finally {
