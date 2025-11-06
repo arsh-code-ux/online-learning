@@ -295,16 +295,16 @@ const CourseCatalog = () => {
           
           <div className="hero-stats">
             <div className="stat-item">
-              <span className="stat-value">{courses.length}+</span>
-              <span className="stat-label">Quality Courses</span>
+              <span className="stat-value" style={{color: 'white'}}>{courses.length}+</span>
+              <span className="stat-label" style={{color: 'white'}}>Quality Courses</span>
             </div>
             <div className="stat-item">
-              <span className="stat-value">10K+</span>
-              <span className="stat-label">Active Students</span>
+              <span className="stat-value" style={{color: 'white'}}>10K+</span>
+              <span className="stat-label" style={{color: 'white'}}>Active Students</span>
             </div>
             <div className="stat-item">
-              <span className="stat-value">98%</span>
-              <span className="stat-label">Success Rate</span>
+              <span className="stat-value" style={{color: 'white'}}>98%</span>
+              <span className="stat-label" style={{color: 'white'}}>Success Rate</span>
             </div>
           </div>
         </div>
