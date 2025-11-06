@@ -90,11 +90,15 @@ const AdminLogin = () => {
       return;
     }
 
-    // Login successful
-    login(adminUser);
+    // Login successful - Set user directly in localStorage and navigate
     localStorage.setItem('user', JSON.stringify(adminUser));
+    localStorage.setItem('token', 'admin_token_' + Date.now()); // Mock token for admin
+    
+    // Manually dispatch login success (since we're using localStorage for demo)
     toast.success('Admin login successful! Welcome back.');
-    navigate('/admin/dashboard');
+    
+    // Force page reload to update auth context
+    window.location.href = '/admin/dashboard';
     setLoading(false);
   };
 

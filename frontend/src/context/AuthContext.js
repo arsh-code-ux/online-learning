@@ -71,10 +71,27 @@ export const AuthProvider = ({ children }) => {
   // Load user function
   const loadUser = async () => {
     const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
     
     if (token) {
       setAuthToken(token);
       
+      // First check if user is in localStorage (for admin or demo mode)
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          dispatch({
+            type: AUTH_ACTIONS.LOAD_USER,
+            payload: user,
+          });
+          dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          return;
+        } catch (error) {
+          console.error('Error parsing stored user:', error);
+        }
+      }
+      
+      // If no stored user, try to get from API
       try {
         const response = await authAPI.getProfile();
         
