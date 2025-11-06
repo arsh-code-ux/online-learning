@@ -63,7 +63,8 @@ const CertificatesPage = () => {
         score: lc.score || lc.percent || 0,
         certificateNumber: lc.certificateNumber,
         isVerified: lc.isVerified !== false,
-        skills: lc.skills || []
+        skills: lc.skills || [],
+        studentName: lc.studentName || user?.fullName || user?.name || 'Student Name'
       }));
 
       setCertificates(earnedCertificates);
@@ -160,7 +161,7 @@ const CertificatesPage = () => {
               <div className="mb-8">
                 <p className="text-lg text-gray-600 mb-4">This is to certify that</p>
                 <h2 className="text-3xl font-bold text-primary-600 mb-4">
-                  {user?.fullName || user?.name || 'Student Name'}
+                  {certificate.studentName}
                 </h2>
                 <p className="text-lg text-gray-600 mb-4">has successfully completed the course</p>
                 <h3 className="text-2xl font-semibold text-gray-800 mb-6">{certificate.courseTitle}</h3>
@@ -246,7 +247,7 @@ const CertificatesPage = () => {
             </p>
             <button
               onClick={() => {
-                toast.info('Please contact support@learnhub.com with your certificate ID and correct full name for name correction.');
+                toast('Please contact support@learnhub.com with your certificate ID and correct full name for name correction.', { icon: '📧', duration: 5000 });
               }}
               className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
             >

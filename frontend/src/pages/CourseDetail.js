@@ -345,7 +345,7 @@ const CourseDetail = () => {
       return;
     }
     
-    toast.info('Redirecting to payment page...');
+    toast('Redirecting to payment page...', { icon: '💳' });
     navigate(`/payment?course=${curriculum.courseId}&price=${curriculum.price}`);
   };
 
