@@ -16,8 +16,18 @@ import {
 import { courseAPI, paymentAPI } from '../utils/api';
 import toast from 'react-hot-toast';
 
-// Stripe public key - using test key for demo
-const stripePromise = loadStripe('pk_test_51234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz');
+// Stripe public key - For production, use environment variable
+// For demo purposes, Stripe is optional - payment will work without it
+const STRIPE_PUBLIC_KEY = process.env.REACT_APP_STRIPE_PUBLIC_KEY || null;
+let stripePromise = null;
+
+// Only initialize Stripe if we have a valid key
+if (STRIPE_PUBLIC_KEY && STRIPE_PUBLIC_KEY.startsWith('pk_')) {
+  stripePromise = loadStripe(STRIPE_PUBLIC_KEY).catch(err => {
+    console.warn('Stripe failed to load:', err);
+    return null;
+  });
+}
 
 const CheckoutForm = ({ course, onSuccess }) => {
   const stripe = useStripe();

@@ -277,15 +277,22 @@ const PremiumPaymentPage = () => {
   useEffect(() => {
     // Lazy-load Stripe.js when this page mounts to avoid loading it globally
     let mounted = true;
-    const key = 'pk_test_51QKqplGzzANjIRRi1f1VhdZfYp8vj5gaxO5JXQOWGtAapNRrDBscGNNRNTPKJPYxbBnqU9qzTLsOsnKw6e0TVKoi00K7xUkxhd';
-    loadStripe(key)
-      .then(sp => {
-        if (mounted) setStripePromise(sp);
-      })
-      .catch(err => {
-        console.error('Failed to load Stripe.js', err);
-        // leave stripePromise as null - we handle fallback in render
-      });
+    // Use environment variable for Stripe key, fallback to null for demo
+    const key = process.env.REACT_APP_STRIPE_PUBLIC_KEY || null;
+    
+    // Only load Stripe if we have a valid key
+    if (key && key.startsWith('pk_')) {
+      loadStripe(key)
+        .then(sp => {
+          if (mounted) setStripePromise(sp);
+        })
+        .catch(err => {
+          console.warn('Stripe.js failed to load:', err);
+          // leave stripePromise as null - we handle fallback in render
+        });
+    } else {
+      console.info('Stripe not configured. Payment will work in demo mode.');
+    }
 
     return () => { mounted = false; };
   }, []);
