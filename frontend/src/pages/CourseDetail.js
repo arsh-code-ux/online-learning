@@ -598,30 +598,35 @@ const CourseDetail = () => {
             {/* Main Content - scrollable container */}
             <div className="lg:col-span-2 space-y-12 max-h-[calc(100vh-200px)] overflow-y-auto pr-4" style={{ scrollBehavior: 'smooth' }}>
               {/* Course Curriculum with Video + Content */}
-              {displayCourse.modules && displayCourse.modules.length > 0 ? (
+              {displayCourse.modules && Array.isArray(displayCourse.modules) && displayCourse.modules.length > 0 ? (
                 <CurriculumSection 
                   curriculum={{
                     ...curriculum,
                     courseId: displayCourse.id || id,
                     modules: displayCourse.modules.map((module, index) => ({
                       id: module.id || `module-${index}`,
-                      title: module.title,
-                      description: module.description,
+                      title: module.title || 'Module ' + (index + 1),
+                      description: module.description || '',
                       duration: module.duration || 'Variable',
-                      lessons: module.videos.map((video, videoIndex) => ({
+                      lessons: (module.videos && Array.isArray(module.videos)) ? module.videos.map((video, videoIndex) => ({
                         id: video.id || `video-${videoIndex}`,
-                        title: video.title,
-                        videoUrl: video.url,
+                        title: video.title || 'Video ' + (videoIndex + 1),
+                        videoUrl: video.url || '',
                         duration: video.duration || '10:00',
-                        summary: video.summary || video.title,
+                        summary: video.summary || video.title || '',
                         completed: false
-                      }))
+                      })) : []
                     }))
                   }} 
                   isEnrolled={isEnrolled} 
                 />
-              ) : (
+              ) : curriculum ? (
                 <CurriculumSection curriculum={curriculum} isEnrolled={isEnrolled} />
+              ) : (
+                <div className="enhanced-card p-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-6">Course Curriculum</h2>
+                  <p className="text-gray-600">Course content will be available soon.</p>
+                </div>
               )}
 
               {/* Course Description */}
