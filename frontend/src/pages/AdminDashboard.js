@@ -5,7 +5,7 @@ import {
   FaUsers, FaCertificate, FaBookOpen, FaChartLine, 
   FaUserGraduate, FaMoneyBillWave, FaCog, FaSignOutAlt,
   FaHome, FaDatabase, FaPlus, FaEdit, FaSearch, FaTrash,
-  FaEye, FaDownload, FaEnvelope
+  FaEye, FaDownload, FaEnvelope, FaShieldAlt, FaBan, FaUnlock, FaKey
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
@@ -14,12 +14,14 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  const [blockedEmails, setBlockedEmails] = useState([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalEnrollments: 0,
     totalCertificates: 0,
     totalCourses: 0,
-    revenue: 0
+    revenue: 0,
+    blockedAccounts: 0
   });
   const [allUsers, setAllUsers] = useState([]);
   const [certificates, setCertificates] = useState([]);
@@ -37,6 +39,9 @@ const AdminDashboard = () => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const certs = JSON.parse(localStorage.getItem('certificates') || '[]');
     const premiumCourses = JSON.parse(localStorage.getItem('premiumCourses') || '[]');
+    const blocked = JSON.parse(localStorage.getItem('blockedAdminEmails') || '[]');
+    
+    setBlockedEmails(blocked);
     
     let totalEnrollments = 0;
     const usersWithEnrollments = users.filter(u => u.role !== 'admin').map(u => {
@@ -59,7 +64,8 @@ const AdminDashboard = () => {
       totalEnrollments,
       totalCertificates: certs.length,
       totalCourses: 5,
-      revenue: premiumCourses.length * 999
+      revenue: premiumCourses.length * 999,
+      blockedAccounts: blocked.length
     });
   };
 
@@ -76,6 +82,16 @@ const AdminDashboard = () => {
       localStorage.setItem('users', JSON.stringify(updatedUsers));
       loadAllData();
       toast.success('User deleted successfully');
+    }
+  };
+
+  const handleUnblockEmail = (email) => {
+    if (window.confirm(`Are you sure you want to unblock ${email}? They will be able to attempt admin login again.`)) {
+      const blocked = JSON.parse(localStorage.getItem('blockedAdminEmails') || '[]');
+      const updated = blocked.filter(e => e !== email);
+      localStorage.setItem('blockedAdminEmails', JSON.stringify(updated));
+      loadAllData();
+      toast.success(`✅ ${email} has been unblocked!`);
     }
   };
 
@@ -144,6 +160,7 @@ const AdminDashboard = () => {
                 <TabButton tab="alldata" icon={FaDatabase} label="All Data" />
                 <TabButton tab="users" icon={FaUsers} label="Users" />
                 <TabButton tab="certificates" icon={FaCertificate} label="Certificates" />
+                <TabButton tab="security" icon={FaShieldAlt} label="Security" />
                 <TabButton tab="courses" icon={FaBookOpen} label="Courses" />
                 <TabButton tab="settings" icon={FaCog} label="Settings" />
               </nav>
@@ -161,7 +178,7 @@ const AdminDashboard = () => {
                   <StatCard icon={FaCertificate} title="Certificates Issued" value={stats.totalCertificates} color="bg-purple-500" bgColor="bg-purple-50" />
                   <StatCard icon={FaBookOpen} title="Total Courses" value={stats.totalCourses} color="bg-orange-500" bgColor="bg-orange-50" />
                   <StatCard icon={FaMoneyBillWave} title="Revenue" value={`₹${stats.revenue.toLocaleString()}`} color="bg-pink-500" bgColor="bg-pink-50" />
-                  <StatCard icon={FaChartLine} title="Growth" value="+24%" color="bg-indigo-500" bgColor="bg-indigo-50" />
+                  <StatCard icon={FaBan} title="Blocked Accounts" value={stats.blockedAccounts} color="bg-red-500" bgColor="bg-red-50" />
                 </div>
 
                 <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
@@ -173,8 +190,8 @@ const AdminDashboard = () => {
                     <button onClick={() => setActiveTab('alldata')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-4 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg">
                       <FaDatabase /><span className="font-medium">View All Data</span>
                     </button>
-                    <button onClick={() => setActiveTab('users')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg">
-                      <FaUsers /><span className="font-medium">Manage Users</span>
+                    <button onClick={() => setActiveTab('security')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-4 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg">
+                      <FaShieldAlt /><span className="font-medium">Security Center</span>
                     </button>
                     <button onClick={() => setActiveTab('certificates')} className="flex items-center justify-center space-x-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-4 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg">
                       <FaEdit /><span className="font-medium">View Certificates</span>
@@ -293,6 +310,119 @@ const AdminDashboard = () => {
                   {certificates.length === 0 && (
                     <div className="text-center py-12"><FaCertificate className="mx-auto text-6xl text-gray-300 mb-4" /><p className="text-gray-500 text-lg">No certificates issued yet</p></div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'security' && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <FaShieldAlt className="text-3xl text-red-500" />
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-800">Security Center</h2>
+                      <p className="text-gray-500">Manage blocked accounts and security settings</p>
+                    </div>
+                  </div>
+                  <div className="bg-red-100 px-4 py-2 rounded-lg">
+                    <span className="text-red-800 font-bold">{blockedEmails.length} Blocked</span>
+                  </div>
+                </div>
+
+                {/* Security Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-red-600 text-sm font-medium">Blocked Accounts</p>
+                        <p className="text-3xl font-bold text-red-700">{blockedEmails.length}</p>
+                      </div>
+                      <FaBan className="text-red-400 text-3xl" />
+                    </div>
+                  </div>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-yellow-600 text-sm font-medium">Max Attempts</p>
+                        <p className="text-3xl font-bold text-yellow-700">3</p>
+                      </div>
+                      <FaKey className="text-yellow-400 text-3xl" />
+                    </div>
+                  </div>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-green-600 text-sm font-medium">Security Status</p>
+                        <p className="text-lg font-bold text-green-700">Active</p>
+                      </div>
+                      <FaShieldAlt className="text-green-400 text-3xl" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Blocked Accounts List */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Blocked Email Addresses</h3>
+                  {blockedEmails.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FaShieldAlt className="mx-auto text-6xl text-gray-300 mb-4" />
+                      <p className="text-gray-500 text-lg">No blocked accounts</p>
+                      <p className="text-gray-400 text-sm mt-2">Accounts are automatically blocked after 3 failed passkey attempts</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {blockedEmails.map((email, idx) => (
+                        <div key={idx} className="bg-white border border-red-200 rounded-lg p-4 flex items-center justify-between hover:shadow-md transition-all duration-200">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                              <FaBan className="text-red-500" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">{email}</p>
+                              <p className="text-sm text-gray-500">Blocked due to failed passkey attempts</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleUnblockEmail(email)}
+                            className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                          >
+                            <FaUnlock />
+                            <span>Unblock</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Security Policy */}
+                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-blue-900 mb-3 flex items-center">
+                    <FaShieldAlt className="mr-2" />
+                    Security Policy
+                  </h3>
+                  <ul className="space-y-2 text-blue-800">
+                    <li className="flex items-start">
+                      <span className="mr-2">🔒</span>
+                      <span>Admin passkey required for all admin login attempts</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">⚠️</span>
+                      <span>Maximum 3 failed passkey attempts allowed</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">🚫</span>
+                      <span>Account permanently blocked after 3 failed attempts</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">🔓</span>
+                      <span>Only super admin can unblock accounts from this panel</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">📧</span>
+                      <span>Blocked emails cannot signup or login as admin</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             )}

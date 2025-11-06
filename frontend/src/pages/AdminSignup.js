@@ -57,6 +57,14 @@ const AdminSignup = () => {
       return;
     }
 
+    // Check if email is blocked
+    const blockedEmails = JSON.parse(localStorage.getItem('blockedAdminEmails') || '[]');
+    if (blockedEmails.includes(formData.email)) {
+      toast.error('❌ This email has been permanently blocked from admin access due to security violations!');
+      setLoading(false);
+      return;
+    }
+
     // Check if user already exists
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const existingUser = users.find(u => u.email === formData.email);

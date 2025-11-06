@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { FaShieldAlt, FaKey, FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaShieldAlt, FaKey, FaUser, FaLock, FaEye, FaEyeSlash, FaBan } from 'react-icons/fa';
 
 // Admin Passkey - Change this for production
 const ADMIN_PASSKEY = 'LMS@Admin2024#Secure';
+const MAX_ATTEMPTS = 3;
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -18,6 +19,18 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasskey, setShowPasskey] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+
+  useEffect(() => {
+    // Check if email is blocked
+    const blockedEmails = JSON.parse(localStorage.getItem('blockedAdminEmails') || '[]');
+    if (formData.email && blockedEmails.includes(formData.email)) {
+      setIsBlocked(true);
+    } else {
+      setIsBlocked(false);
+    }
+  }, [formData.email]);
 
   const handleChange = (e) => {
     setFormData({
@@ -30,12 +43,35 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate admin passkey first
-    if (formData.adminPasskey !== ADMIN_PASSKEY) {
-      toast.error('Invalid Admin Passkey! Access Denied.');
+    // Check if email is blocked
+    const blockedEmails = JSON.parse(localStorage.getItem('blockedAdminEmails') || '[]');
+    if (blockedEmails.includes(formData.email)) {
+      toast.error('❌ This account has been permanently blocked due to multiple failed passkey attempts!');
       setLoading(false);
       return;
     }
+
+    // Validate admin passkey first
+    if (formData.adminPasskey !== ADMIN_PASSKEY) {
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+      
+      if (newAttempts >= MAX_ATTEMPTS) {
+        // Block the email permanently
+        blockedEmails.push(formData.email);
+        localStorage.setItem('blockedAdminEmails', JSON.stringify(blockedEmails));
+        setIsBlocked(true);
+        toast.error(`🚫 Account Permanently Blocked! You entered wrong passkey ${MAX_ATTEMPTS} times. This email can never login as admin again!`);
+      } else {
+        const remainingAttempts = MAX_ATTEMPTS - newAttempts;
+        toast.error(`❌ Invalid Admin Passkey! ${remainingAttempts} attempt(s) remaining before permanent block!`);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Reset attempts on correct passkey
+    setFailedAttempts(0);
 
     // Check if admin exists in localStorage
     const users = JSON.parse(localStorage.getItem('users') || '[]');
@@ -88,6 +124,34 @@ const AdminLogin = () => {
 
         {/* Login Form */}
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
+          {/* Blocked Warning */}
+          {isBlocked && (
+            <div className="mb-6 p-4 bg-red-500/20 border-2 border-red-500 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <FaBan className="text-red-400 text-2xl" />
+                <div>
+                  <h3 className="text-red-300 font-bold text-lg">Account Permanently Blocked!</h3>
+                  <p className="text-red-200 text-sm">This email has been blocked due to multiple failed passkey attempts.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Attempts Warning */}
+          {failedAttempts > 0 && failedAttempts < MAX_ATTEMPTS && (
+            <div className="mb-6 p-4 bg-yellow-500/20 border-2 border-yellow-500 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <FaKey className="text-yellow-400 text-2xl" />
+                <div>
+                  <h3 className="text-yellow-300 font-bold">Warning!</h3>
+                  <p className="text-yellow-200 text-sm">
+                    {MAX_ATTEMPTS - failedAttempts} attempt(s) remaining before permanent block!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Admin Passkey */}
             <div>
@@ -114,7 +178,7 @@ const AdminLogin = () => {
                 </button>
               </div>
               <p className="text-xs text-yellow-300 mt-1">
-                🔒 Required for admin access only
+                🔒 Required for admin access only. Max {MAX_ATTEMPTS} attempts allowed!
               </p>
             </div>
 
@@ -164,10 +228,14 @@ const AdminLogin = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 py-3 rounded-lg font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+              disabled={loading || isBlocked}
+              className={`w-full py-3 rounded-lg font-bold text-lg transition-all duration-300 transform shadow-xl ${
+                isBlocked 
+                  ? 'bg-gray-500 cursor-not-allowed opacity-50' 
+                  : 'bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 hover:from-yellow-500 hover:to-orange-600 hover:scale-105'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              {loading ? 'Verifying...' : 'Login as Admin'}
+              {loading ? 'Verifying...' : isBlocked ? '🚫 Account Blocked' : 'Login as Admin'}
             </button>
           </form>
 
