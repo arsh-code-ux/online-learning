@@ -6,7 +6,6 @@ import {
   FaLock,
   FaBell,
   FaPalette,
-  FaGlobe,
   FaShieldAlt,
   FaSave,
   FaEye,
@@ -70,10 +69,11 @@ const SettingsPage = () => {
     const savedSettings = localStorage.getItem('userSettings');
     if (savedSettings) {
       const parsed = JSON.parse(savedSettings);
-      setNotifications(parsed.notifications || notifications);
-      setAppearance(parsed.appearance || appearance);
-      setPrivacy(parsed.privacy || privacy);
+      if (parsed.notifications) setNotifications(parsed.notifications);
+      if (parsed.appearance) setAppearance(parsed.appearance);
+      if (parsed.privacy) setPrivacy(parsed.privacy);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleProfileUpdate = async (e) => {
