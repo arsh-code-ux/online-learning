@@ -311,124 +311,166 @@ const CourseCatalog = () => {
       </section>
 
       {/* Filters & Search Section */}
-      <section className="relative py-12 px-4 bg-gradient-to-r from-white via-blue-50 to-purple-50 border-b border-blue-200">
+      <section className="relative py-16 px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">🔍 Find Your Perfect Course</h2>
-            <p className="text-gray-600">Use our smart filters to discover courses tailored to your needs</p>
+          <div className="text-center mb-12">
+            <div className="inline-block mb-4 px-6 py-2 bg-white rounded-full shadow-md">
+              <span className="text-2xl">🔍</span>
+            </div>
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              Find Your Perfect Course
+            </h2>
+            <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+              Use our smart filters to discover courses tailored to your needs
+            </p>
           </div>
           
-          <div className="grid lg:grid-cols-4 gap-6">
-            {/* Enhanced Search */}
-            <div className="lg:col-span-2">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FaSearch className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="🚀 Search courses, instructors, topics..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white group-focus-within:shadow-lg"
-                />
-                {searchTerm && (
-                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      ✕
-                    </button>
+          {/* Main Filter Card */}
+          <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
+            <div className="grid lg:grid-cols-4 gap-6">
+              {/* Enhanced Search */}
+              <div className="lg:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+                  🚀 Search Courses
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <FaSearch className="h-5 w-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
-                )}
+                  <input
+                    type="text"
+                    placeholder="Search courses, instructors, topics..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-14 pr-12 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-gray-50 hover:bg-white group-focus-within:shadow-xl text-gray-900 font-medium placeholder-gray-400"
+                  />
+                  {searchTerm && (
+                    <div className="absolute inset-y-0 right-0 pr-5 flex items-center">
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="text-gray-400 hover:text-red-500 transition-colors bg-gray-100 hover:bg-red-50 rounded-full p-2"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+                  📚 Category
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all bg-gray-50 hover:bg-white font-semibold text-gray-900 cursor-pointer appearance-none"
+                    style={{backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem'}}
+                  >
+                    {categories.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Sort */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+                  ⚡ Sort By
+                </label>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all bg-gray-50 hover:bg-white font-semibold text-gray-900 cursor-pointer appearance-none"
+                    style={{backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: 'right 0.5rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em', paddingRight: '2.5rem'}}
+                  >
+                    <option value="popular">Most Popular</option>
+                    <option value="rating">Highest Rated</option>
+                    <option value="newest">Newest</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
+                </div>
               </div>
             </div>
 
-            {/* Category Filter */}
-            <div>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Additional Filters */}
+            <div className="mt-8 pt-8 border-t-2 border-gray-100">
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg">
+                    <FaFilter className="text-white text-sm" />
+                  </div>
+                  <span className="text-sm font-bold text-gray-800 uppercase tracking-wide">Quick Filters</span>
+                </div>
 
-            {/* Sort */}
-            <div>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="popular">Most Popular</option>
-                <option value="rating">Highest Rated</option>
-                <option value="newest">Newest</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
+                {/* Level Filter */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-600 uppercase">Level:</span>
+                  <div className="flex gap-2">
+                    {levels.map(level => (
+                      <button
+                        key={level}
+                        onClick={() => setSelectedLevel(level)}
+                        className={`px-4 py-2 text-sm font-bold rounded-xl capitalize transition-all transform hover:scale-105 ${
+                          selectedLevel === level
+                            ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                        }`}
+                      >
+                        {level === 'all' ? 'All Levels' : level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pricing Filter */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-600 uppercase">Price:</span>
+                  <div className="flex gap-2">
+                    {pricingOptions.map(pricing => (
+                      <button
+                        key={pricing}
+                        onClick={() => setSelectedPricing(pricing)}
+                        className={`px-4 py-2 text-sm font-bold rounded-xl capitalize transition-all transform hover:scale-105 ${
+                          selectedPricing === pricing
+                            ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                        }`}
+                      >
+                        {pricing === 'all' ? 'All' : 
+                         pricing === 'free' ? '💎 Free' : 
+                         pricing === 'premium' ? '⭐ Paid' : pricing}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                {(searchTerm || selectedCategory !== 'all' || selectedLevel !== 'all' || selectedPricing !== 'all') && (
+                  <button
+                    onClick={clearFilters}
+                    className="ml-auto px-6 py-2 text-sm font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition-all transform hover:scale-105 border-2 border-red-200"
+                  >
+                    🔄 Clear All
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Additional Filters */}
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            <div className="flex items-center space-x-2">
-              <FaFilter className="text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Filters:</span>
-            </div>
-
-            {/* Level Filter */}
-            <div className="flex space-x-2">
-              {levels.map(level => (
-                <button
-                  key={level}
-                  onClick={() => setSelectedLevel(level)}
-                  className={`px-3 py-1 text-sm font-medium rounded-full capitalize transition-colors ${
-                    selectedLevel === level
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {level === 'all' ? 'All Levels' : level}
-                </button>
-              ))}
-            </div>
-
-            {/* Pricing Filter */}
-            <div className="flex space-x-2">
-              {pricingOptions.map(pricing => (
-                <button
-                  key={pricing}
-                  onClick={() => setSelectedPricing(pricing)}
-                  className={`px-3 py-1 text-sm font-medium rounded-full capitalize transition-colors ${
-                    selectedPricing === pricing
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  {pricing === 'all' ? 'All Prices' : 
-                   pricing === 'free' ? 'Free Courses' : 
-                   pricing === 'premium' ? 'Paid Courses' : pricing}
-                </button>
-              ))}
-            </div>
-
-            {/* Clear Filters */}
-            {(searchTerm || selectedCategory !== 'all' || selectedLevel !== 'all' || selectedPricing !== 'all') && (
-              <button
-                onClick={clearFilters}
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-              >
-                Clear all filters
-              </button>
-            )}
+          {/* Results Info */}
+          <div className="text-center">
+            <p className="text-lg font-semibold text-gray-700">
+              Found <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{filteredCourses.length}</span> courses matching your criteria
+            </p>
           </div>
         </div>
       </section>

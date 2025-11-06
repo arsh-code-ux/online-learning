@@ -40,20 +40,23 @@
 .hero-title {
   font-size: 3.5rem;
   font-weight: 800;
-  color: white;
+  color: #ffffff !important;
   margin: 0 0 1rem 0;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   animation: fadeInUp 0.8s ease-out;
+  line-height: 1.2;
 }
 
 .hero-subtitle {
   font-size: 1.25rem;
-  color: rgba(255, 255, 255, 0.95);
+  color: #ffffff !important;
   margin: 0 0 2rem 0;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
   animation: fadeInUp 1s ease-out;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  line-height: 1.6;
 }
 
 .hero-stats {
@@ -66,21 +69,35 @@
 
 .stat-item {
   text-align: center;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .stat-value {
   font-size: 2.5rem;
   font-weight: 800;
-  color: white;
+  color: #ffffff !important;
   display: block;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .stat-label {
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: #ffffff !important;
   margin-top: 0.5rem;
   display: block;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Search and Filters Section */
