@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuth } from './context/AuthContext';
 
@@ -72,13 +72,18 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 // };
 
 function App() {
+  const location = useLocation();
+  
+  // Hide navbar on admin routes
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
   // Development Google Client ID with proper origins configured
   const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "1030492698153-6vad3dms8kji8ll0burl58o2u7e4dpht.apps.googleusercontent.com";
   
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar />
+        {!isAdminRoute && <Navbar />}
       
       <main className="flex-grow">
         <Routes>

@@ -8,10 +8,14 @@ import {
   FaFilter,
   FaGraduationCap,
   FaCertificate,
-  FaPlay
+  FaPlay,
+  FaBookOpen,
+  FaTrophy,
+  FaAward
 } from 'react-icons/fa';
 import { CourseContext } from '../context/CourseContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import './CourseCatalog.css';
 
 // Custom CSS animations
 const customStyles = `
@@ -278,72 +282,33 @@ const CourseCatalog = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-10 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-r from-green-400 to-blue-500 rounded-full opacity-10 animate-bounce"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full opacity-5 animate-spin" style={{animationDuration: '20s'}}></div>
-        
-        {/* Floating Learning Icons */}
-        <div className="absolute top-20 left-10 text-4xl animate-bounce" style={{animationDelay: '0s'}}>📚</div>
-        <div className="absolute top-40 right-20 text-3xl animate-bounce" style={{animationDelay: '1s'}}>🎓</div>
-        <div className="absolute bottom-40 left-20 text-3xl animate-bounce" style={{animationDelay: '2s'}}>💡</div>
-        <div className="absolute bottom-20 right-10 text-4xl animate-bounce" style={{animationDelay: '0.5s'}}>🚀</div>
-        <div className="absolute top-1/3 left-1/4 text-2xl animate-bounce" style={{animationDelay: '1.5s'}}>⭐</div>
-        <div className="absolute top-2/3 right-1/3 text-3xl animate-bounce" style={{animationDelay: '2.5s'}}>🏆</div>
-      </div>
-
+    <div className="course-catalog-container">
       {/* Hero Section */}
-  <section className="relative bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 py-12 px-4 overflow-hidden z-10">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: '60px 60px'
-          }}></div>
+      <section className="catalog-hero">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            🎓 Discover Your Path to Excellence
+          </h1>
+          <p className="hero-subtitle">
+            Explore world-class courses designed to transform your skills and accelerate your career growth
+          </p>
+          
+          <div className="hero-stats">
+            <div className="stat-item">
+              <span className="stat-value">{courses.length}+</span>
+              <span className="stat-label">Quality Courses</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">10K+</span>
+              <span className="stat-label">Active Students</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">98%</span>
+              <span className="stat-label">Success Rate</span>
+            </div>
+          </div>
         </div>
-        
-        {/* Floating Geometric Shapes */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-16 h-16 bg-blue-400/20 rounded-full animate-bounce"></div>
-        <div className="absolute top-1/2 right-10 w-12 h-12 bg-purple-400/20 rounded-full animate-ping"></div>
-        
-        <div className="max-w-6xl mx-auto text-center relative z-20">
-          <div className="animate-fade-in-up">
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent">
-              Course <span className="text-yellow-300">Catalog</span> 📖
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 leading-relaxed max-w-4xl mx-auto mb-10">
-              🌟 Explore our comprehensive collection of courses designed to boost your skills and advance your career with interactive learning experiences
-            </p>
-            
-            {/* Interactive Stats Cards */}
-            <div className="flex flex-wrap justify-center gap-6 mb-8">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FaGraduationCap className="text-3xl text-yellow-300" />
-                  <div className="text-left">
-                    <div className="text-2xl font-bold text-white">{courses.length}</div>
-                    <div className="text-blue-200 text-sm">Total Courses</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FaUsers className="text-3xl text-green-300" />
-                  <div className="text-left">
-                    <div className="text-2xl font-bold text-white">10K+</div>
-                    <div className="text-blue-200 text-sm">Happy Students</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-4 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                <div className="flex items-center space-x-3">
-                  <FaCertificate className="text-3xl text-purple-300" />
-                  <div className="text-left">
+      </section>
                     <div className="text-2xl font-bold text-white">100%</div>
                     <div className="text-blue-200 text-sm">Certified</div>
                   </div>
