@@ -1079,7 +1079,7 @@ const courseIdMappings = {
   "8": "web-development",
   "9": "data-analysis",
   "10": "communication-skills", // Default for course ID 10
-  "11": "web-development",
+  "11": "data-analysis", // Fixed: was web-development
   "12": "data-analysis",
   "soft-skills": "communication-skills",
   "technical-skills": "web-development",

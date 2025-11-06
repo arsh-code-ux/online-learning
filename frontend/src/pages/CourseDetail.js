@@ -411,11 +411,12 @@ const CourseDetail = () => {
   if (!course && !curriculum) return <div className="text-center py-20">Course not found</div>;
 
   // Prepare a display object that prefers API course data but falls back to curriculum data
+  // For modules, ALWAYS prefer curriculum data as it has the detailed content, videos, and summaries
   const displayCourse = {
     title: course?.title || curriculum?.courseTitle || 'Course',
     description: course?.description || curriculum?.description || '',
     duration: course?.duration || curriculum?.totalDuration || '',
-    modules: course?.modules || curriculum?.modules || [],
+    modules: curriculum?.modules || course?.modules || [], // Prefer curriculum modules
     longDescription: course?.longDescription || course?.description || curriculum?.description || '',
     instructor: course?.instructor || { name: curriculum?.instructor || 'Expert Instructor', title: '', bio: '' },
     rating: course?.rating || 4.8,
@@ -598,29 +599,7 @@ const CourseDetail = () => {
             {/* Main Content - scrollable container */}
             <div className="lg:col-span-2 space-y-12 max-h-[calc(100vh-200px)] overflow-y-auto pr-4" style={{ scrollBehavior: 'smooth' }}>
               {/* Course Curriculum with Video + Content */}
-              {displayCourse.modules && Array.isArray(displayCourse.modules) && displayCourse.modules.length > 0 ? (
-                <CurriculumSection 
-                  curriculum={{
-                    ...curriculum,
-                    courseId: displayCourse.id || id,
-                    modules: displayCourse.modules.map((module, index) => ({
-                      id: module.id || `module-${index}`,
-                      title: module.title || 'Module ' + (index + 1),
-                      description: module.description || '',
-                      duration: module.duration || 'Variable',
-                      lessons: (module.videos && Array.isArray(module.videos)) ? module.videos.map((video, videoIndex) => ({
-                        id: video.id || `video-${videoIndex}`,
-                        title: video.title || 'Video ' + (videoIndex + 1),
-                        videoUrl: video.url || '',
-                        duration: video.duration || '10:00',
-                        summary: video.summary || video.title || '',
-                        completed: false
-                      })) : []
-                    }))
-                  }} 
-                  isEnrolled={isEnrolled} 
-                />
-              ) : curriculum ? (
+              {curriculum ? (
                 <CurriculumSection curriculum={curriculum} isEnrolled={isEnrolled} />
               ) : (
                 <div className="enhanced-card p-8">

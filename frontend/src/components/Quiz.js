@@ -38,13 +38,8 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
         if (typeof ans === 'number' && ans === q.answer) correct += 1;
         autoCorrectCount += 1;
       } else if (q.type === 'essay') {
-        // Enhanced keyword-match grading with length validation
+        // Keyword-match grading - no minimum length requirement
         const text = (ans || '').trim().toLowerCase();
-        
-        // Check if answer has minimum length (at least 50 characters for meaningful answer)
-        if (text.length < 50) {
-          return; // Not counted as correct if too short
-        }
         
         // Check keyword relevance - need at least 60% of keywords present
         const found = q.keywords.filter(k => text.includes(k.toLowerCase())).length;
@@ -69,16 +64,11 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
       return;
     }
     
-    // Validate essay answers have minimum length and relevant content
+    // Validate essay answers have relevant content (at least one keyword)
     const invalidEssays = questions.filter(q => {
       if (q.type === 'essay') {
         const ans = answers[q.id] || '';
         const text = ans.trim().toLowerCase();
-        
-        // Must be at least 50 characters
-        if (text.length < 50) {
-          return true;
-        }
         
         // Must contain at least one keyword to be considered relevant
         const hasKeyword = q.keywords.some(k => text.includes(k.toLowerCase()));
@@ -90,7 +80,7 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
     });
     
     if (invalidEssays.length > 0) {
-      toast.error('Please provide detailed and relevant answers to the essay questions (minimum 50 characters and related to the topic).');
+      toast.error('Please provide relevant answers to the essay questions (must include related keywords).');
       return;
     }
     
@@ -158,7 +148,7 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
     <div className="bg-white rounded-lg p-6 shadow-md">
       <h3 className="text-xl font-semibold mb-4">Final Quiz</h3>
       <p className="text-sm text-gray-600 mb-4">
-        Answer all questions carefully. Essay questions require detailed answers (minimum 50 characters) that are relevant to the topic. 
+        Answer all questions carefully. Essay questions must include relevant keywords related to the topic. 
         <strong> Passing score: 85%</strong>
       </p>
 
@@ -167,18 +157,36 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
           <div className="font-medium mb-2">{idx + 1}. {q.question}</div>
           {q.type === 'mcq' ? (
             <div className="space-y-2">
-              {q.options.map((opt, oi) => (
-                <label key={oi} className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name={q.id}
-                    checked={answers[q.id] === oi}
-                    onChange={() => handleChange(q.id, oi)}
-                    disabled={submitted}
-                  />
-                  <span>{opt}</span>
-                </label>
-              ))}
+              {q.options.map((opt, oi) => {
+                const isSelected = answers[q.id] === oi;
+                const isCorrect = oi === q.answer;
+                const showCorrect = submitted && isCorrect;
+                const showIncorrect = submitted && isSelected && !isCorrect;
+                
+                return (
+                  <label 
+                    key={oi} 
+                    className={`flex items-center gap-2 p-2 rounded ${
+                      showCorrect ? 'bg-green-100 border-2 border-green-500' : 
+                      showIncorrect ? 'bg-red-100 border-2 border-red-500' : 
+                      ''
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={q.id}
+                      checked={isSelected}
+                      onChange={() => handleChange(q.id, oi)}
+                      disabled={submitted}
+                    />
+                    <span className={showCorrect ? 'font-semibold text-green-700' : showIncorrect ? 'text-red-700' : ''}>
+                      {opt}
+                      {showCorrect && ' ✓ (Correct Answer)'}
+                      {showIncorrect && ' ✗ (Your Answer)'}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           ) : (
             <div>
@@ -187,12 +195,33 @@ const Quiz = ({ courseId, onComplete, questions = defaultQuestions }) => {
                 value={answers[q.id] || ''}
                 onChange={(e) => handleChange(q.id, e.target.value)}
                 disabled={submitted}
-                placeholder="Write a detailed answer (minimum 50 characters)..."
+                placeholder="Write your answer with relevant keywords..."
                 className="w-full p-2 border rounded"
               />
-              <div className="text-xs text-gray-500 mt-1">
-                Characters: {(answers[q.id] || '').length} / 50 minimum
-              </div>
+              {submitted && (
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
+                  <div className="font-semibold text-blue-800 mb-1">Expected Keywords:</div>
+                  <div className="text-sm text-blue-700">
+                    {q.keywords.map((keyword, ki) => {
+                      const userAnswer = (answers[q.id] || '').toLowerCase();
+                      const found = userAnswer.includes(keyword.toLowerCase());
+                      return (
+                        <span 
+                          key={ki}
+                          className={`inline-block px-2 py-1 m-1 rounded ${
+                            found ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          {keyword} {found ? '✓' : ''}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <div className="text-xs text-blue-600 mt-2">
+                    💡 A good answer should include at least 60% of these keywords to be considered correct.
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

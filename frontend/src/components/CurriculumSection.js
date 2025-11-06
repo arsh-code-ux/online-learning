@@ -80,7 +80,7 @@ const CurriculumSection = ({ curriculum, isEnrolled = false }) => {
 
   return (
     <div className="curriculum-section">
-      <style jsx>{`
+      <style>{`
         .curriculum-section {
           background: white;
           border-radius: 16px;

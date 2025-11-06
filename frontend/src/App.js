@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useAuth } from './context/AuthContext';
-import { initializeSampleCourses } from './utils/initializeSampleCourses';
 
 // Layout Components
 import Navbar from './components/layout/Navbar';
@@ -74,11 +73,6 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
 
 function App() {
   const location = useLocation();
-  
-  // Initialize sample courses on app load
-  useEffect(() => {
-    initializeSampleCourses();
-  }, []);
   
   // Hide navbar on admin routes
   const isAdminRoute = location.pathname.startsWith('/admin');
