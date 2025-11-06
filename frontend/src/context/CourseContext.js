@@ -176,7 +176,7 @@ export const CourseProvider = ({ children }) => {
     } catch (error) {
       console.error('Fetch courses error:', error);
       
-      // Fallback to curriculum data when API fails
+      // Load both predefined curriculum courses and admin courses
       const fallbackCourses = Object.values(courseCurriculums).map((curriculum, index) => ({
         _id: curriculum.courseId,
         id: index + 1,
@@ -197,9 +197,35 @@ export const CourseProvider = ({ children }) => {
         curriculumData: curriculum
       }));
       
+      // Get admin courses from localStorage
+      const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+      const formattedAdminCourses = adminCourses.map((course, index) => ({
+        _id: course.id,
+        id: `admin-${index}`,
+        title: course.title,
+        description: course.description,
+        category: course.category,
+        level: course.level,
+        price: course.price,
+        originalPrice: course.price > 0 ? course.price * 1.2 : 0,
+        duration: course.duration || '4 weeks',
+        lessons: course.modules?.length || 0,
+        rating: course.rating || 4.7,
+        students: course.students || 0,
+        image: course.thumbnail || `/api/placeholder/400/300?text=${encodeURIComponent(course.title)}`,
+        instructor: course.instructor || 'Expert Instructor',
+        tags: course.isPremium ? ['Premium'] : ['Free'],
+        isPremium: course.isPremium || false,
+        modules: course.modules || [],
+        isAdminCourse: true
+      }));
+      
+      // Combine both predefined and admin courses
+      const allCourses = [...fallbackCourses, ...formattedAdminCourses];
+      
       dispatch({
         type: COURSE_ACTIONS.SET_COURSES,
-        payload: fallbackCourses,
+        payload: allCourses,
       });
       
       dispatch({
@@ -207,7 +233,7 @@ export const CourseProvider = ({ children }) => {
         payload: {
           currentPage: 1,
           totalPages: 1,
-          totalCourses: fallbackCourses.length,
+          totalCourses: allCourses.length,
           hasNextPage: false,
           hasPrevPage: false,
         },
@@ -398,8 +424,36 @@ export const CourseProvider = ({ children }) => {
 
   // Get course by ID from state (if already loaded)
   const getCourseFromState = (courseId) => {
-    return state.courses.find(course => course._id === courseId) || 
-           state.currentCourse;
+    // First check in loaded courses
+    let course = state.courses.find(course => course._id === courseId);
+    
+    // If not found, check admin courses in localStorage
+    if (!course) {
+      const adminCourses = JSON.parse(localStorage.getItem('adminCourses') || '[]');
+      course = adminCourses.find(c => c.id === courseId);
+      if (course) {
+        // Format admin course to match expected structure
+        return {
+          _id: course.id,
+          ...course,
+          isAdminCourse: true
+        };
+      }
+    }
+    
+    // If still not found, check curriculum data
+    if (!course && courseCurriculums[courseId]) {
+      const curriculum = courseCurriculums[courseId];
+      return {
+        _id: curriculum.courseId,
+        title: curriculum.courseTitle,
+        description: curriculum.description,
+        curriculumData: curriculum,
+        ...curriculum
+      };
+    }
+    
+    return course || state.currentCourse;
   };
 
   // Check if user is enrolled in a course
