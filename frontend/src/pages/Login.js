@@ -8,7 +8,8 @@ import toast from 'react-hot-toast';
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    role: 'student'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -183,6 +184,14 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // If admin role selected, redirect to admin login
+    if (formData.role === 'admin') {
+      toast.error('⚠️ Please use Admin Login page for admin access!');
+      window.location.href = '/admin/login';
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -270,6 +279,27 @@ const Login = () => {
               placeholder="Enter your email"
               required
             />
+          </div>
+
+          <div>
+            <label htmlFor="role" className="block text-sm font-semibold text-gray-700 mb-2">
+              I want to join as
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="form-input"
+            >
+              <option value="student">Student</option>
+              <option value="admin">Admin</option>
+            </select>
+            {formData.role === 'admin' && (
+              <p className="text-xs text-yellow-600 mt-1 flex items-center">
+                ⚠️ Selecting admin will redirect you to Admin Login page
+              </p>
+            )}
           </div>
 
           <div>

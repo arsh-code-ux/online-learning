@@ -1,9 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaKey, FaShieldAlt } from 'react-icons/fa';
 import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+
+// Admin Passkey - Must match AdminLogin
+const ADMIN_PASSKEY = 'LMS@Admin2024#Secure';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,12 +14,14 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPasskey, setShowPasskey] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'student'
+    role: 'student',
+    adminPasskey: ''
   });
 
   const handleChange = (e) => {
@@ -39,12 +44,34 @@ const Register = () => {
       return;
     }
 
+    // Check if admin role is selected and validate passkey
+    if (formData.role === 'admin') {
+      // Check if email is blocked
+      const blockedEmails = JSON.parse(localStorage.getItem('blockedAdminEmails') || '[]');
+      if (blockedEmails.includes(formData.email)) {
+        toast.error('❌ This email has been permanently blocked from admin access!');
+        return;
+      }
+
+      // Validate admin passkey
+      if (formData.adminPasskey !== ADMIN_PASSKEY) {
+        toast.error('❌ Invalid Admin Passkey! Cannot register as admin.');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const { confirmPassword, adminPasskey, ...registerData } = formData;
       await register(registerData);
-      toast.success('Registration successful! Please sign in.');
+      
+      if (formData.role === 'admin') {
+        toast.success('🎉 Admin registration successful! Please sign in.');
+      } else {
+        toast.success('Registration successful! Please sign in.');
+      }
+      
       navigate('/login');
     } catch (error) {
       toast.error('Registration failed. Please try again.');
@@ -142,6 +169,45 @@ const Register = () => {
                 </select>
               </div>
             </div>
+
+            {/* Admin Passkey Field - Only shown when Admin is selected */}
+            {formData.role === 'admin' && (
+              <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                <div className="flex items-center space-x-2 mb-3">
+                  <FaShieldAlt className="text-yellow-600 text-xl" />
+                  <label htmlFor="adminPasskey" className="block text-sm font-bold text-yellow-800">
+                    Admin Passkey Required
+                  </label>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaKey className="h-5 w-5 text-yellow-600" />
+                  </div>
+                  <input
+                    id="adminPasskey"
+                    name="adminPasskey"
+                    type={showPasskey ? 'text' : 'password'}
+                    required={formData.role === 'admin'}
+                    value={formData.adminPasskey}
+                    onChange={handleChange}
+                    className="input-field pl-10 pr-10 border-yellow-400 focus:ring-yellow-500 focus:border-yellow-500"
+                    placeholder="Enter Admin Passkey"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowPasskey(!showPasskey)}
+                      className="text-yellow-600 hover:text-yellow-800"
+                    >
+                      {showPasskey ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-yellow-700 mt-2">
+                  🔒 Special passkey required for admin registration. Contact system administrator if you don't have it.
+                </p>
+              </div>
+            )}
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
